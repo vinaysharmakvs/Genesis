@@ -376,6 +376,12 @@
         gap: 14px;
       }
 
+      .form-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
       label {
         display: grid;
         gap: 8px;
@@ -501,6 +507,7 @@
         }
 
         .form-row,
+        .form-actions,
         .quick-grid {
           grid-template-columns: 1fr;
         }
@@ -654,8 +661,11 @@
             Message
             <textarea id="message" placeholder="Share your concern: marks, focus, confidence, career confusion"></textarea>
           </label>
-          <button class="button primary" type="submit">Send Inquiry on WhatsApp</button>
-          <div class="form-message" id="formMessage">Opening WhatsApp with your inquiry.</div>
+          <div class="form-actions">
+            <button class="button secondary" type="submit" data-action="save">Submit</button>
+            <button class="button primary" type="submit" data-action="whatsapp">Discuss Study Plan on WhatsApp</button>
+          </div>
+          <div class="form-message" id="formMessage">Saving your inquiry.</div>
         </form>
       </section>
     </main>
@@ -702,6 +712,42 @@
         });
       });
 
+      const submitContactToGoogle = ({ name, phone, className, interest, message }) => {
+        const iframeName = "genesisContactGoogleFormFrame";
+        let iframe = document.querySelector(`iframe[name="${iframeName}"]`);
+        if (!iframe) {
+          iframe = document.createElement("iframe");
+          iframe.name = iframeName;
+          iframe.style.display = "none";
+          document.body.appendChild(iframe);
+        }
+
+        const googleForm = document.createElement("form");
+        googleForm.action = "https://docs.google.com/forms/d/e/1FAIpQLSf6Vye3lY8a45d2aMB5D6hIST_wvTXWgRXHDFSfbU8BosCAxw/formResponse";
+        googleForm.method = "POST";
+        googleForm.target = iframeName;
+        googleForm.style.display = "none";
+
+        const fields = {
+          "entry.783293786": name,
+          "entry.1131349948": phone,
+          "entry.1512065109": className,
+          "entry.567125646": `${interest} | Message: ${message}`,
+        };
+
+        Object.entries(fields).forEach(([entry, value]) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = entry;
+          input.value = value;
+          googleForm.appendChild(input);
+        });
+
+        document.body.appendChild(googleForm);
+        googleForm.submit();
+        setTimeout(() => googleForm.remove(), 1200);
+      };
+
       document.getElementById("contactForm").addEventListener("submit", (event) => {
         event.preventDefault();
         const name = document.getElementById("parentName").value.trim();
@@ -709,9 +755,21 @@
         const className = document.getElementById("studentClass").value;
         const interest = document.getElementById("interest").value;
         const message = document.getElementById("message").value.trim() || "Need academic counselling";
+        const action = event.submitter?.dataset.action || "save";
         const text = `Hello Genesis Educates, I want to book a counselling visit.%0AParent: ${encodeURIComponent(name)}%0APhone: ${encodeURIComponent(phone)}%0AClass: ${encodeURIComponent(className)}%0AInterested in: ${encodeURIComponent(interest)}%0AMessage: ${encodeURIComponent(message)}`;
+
+        submitContactToGoogle({ name, phone, className, interest, message });
         document.getElementById("formMessage").style.display = "block";
-        window.open(`https://wa.me/919041056405?text=${text}`, "_blank", "noopener,noreferrer");
+        document.getElementById("formMessage").textContent =
+          action === "whatsapp"
+            ? "Inquiry saved. Opening WhatsApp with your study plan request."
+            : "Thank you. Your counselling inquiry has been submitted.";
+
+        if (action === "whatsapp") {
+          setTimeout(() => {
+            window.open(`https://wa.me/919041056405?text=${text}`, "_blank", "noopener,noreferrer");
+          }, 350);
+        }
       });
 
       const revealObserver = new IntersectionObserver(
