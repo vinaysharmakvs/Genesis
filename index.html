@@ -1203,6 +1203,12 @@
         gap: 14px;
       }
 
+      .form-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
       label {
         display: grid;
         gap: 8px;
@@ -1453,6 +1459,7 @@
         .video-grid,
         .testimonial-shell,
         .form-row,
+        .form-actions,
         .branches,
         .result-row {
           grid-template-columns: 1fr;
@@ -1986,8 +1993,11 @@
             Main Concern
             <textarea id="studentConcern" placeholder="Example: focus, marks, confidence, career confusion"></textarea>
           </label>
-          <button class="button primary" type="submit">Discuss Study Plan on WhatsApp</button>
-          <div class="form-message" id="formMessage">Opening WhatsApp with your inquiry.</div>
+          <div class="form-actions">
+            <button class="button secondary" type="submit" data-action="save">Submit</button>
+            <button class="button primary" type="submit" data-action="whatsapp">Discuss Study Plan on WhatsApp</button>
+          </div>
+          <div class="form-message" id="formMessage">Saving your inquiry.</div>
         </form>
       </section>
 
@@ -2187,6 +2197,42 @@
         if (event.key === "Escape") closeVideo();
       });
 
+      const submitStudyPlanToGoogle = ({ name, phone, className, goal, concern }) => {
+        const iframeName = "genesisGoogleFormFrame";
+        let iframe = document.querySelector(`iframe[name="${iframeName}"]`);
+        if (!iframe) {
+          iframe = document.createElement("iframe");
+          iframe.name = iframeName;
+          iframe.style.display = "none";
+          document.body.appendChild(iframe);
+        }
+
+        const googleForm = document.createElement("form");
+        googleForm.action = "https://docs.google.com/forms/d/e/1FAIpQLSf6Vye3lY8a45d2aMB5D6hIST_wvTXWgRXHDFSfbU8BosCAxw/formResponse";
+        googleForm.method = "POST";
+        googleForm.target = iframeName;
+        googleForm.style.display = "none";
+
+        const fields = {
+          "entry.783293786": name,
+          "entry.1131349948": phone,
+          "entry.1512065109": className,
+          "entry.567125646": `${goal} | Concern: ${concern}`,
+        };
+
+        Object.entries(fields).forEach(([entry, value]) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = entry;
+          input.value = value;
+          googleForm.appendChild(input);
+        });
+
+        document.body.appendChild(googleForm);
+        googleForm.submit();
+        setTimeout(() => googleForm.remove(), 1200);
+      };
+
       document.getElementById("studyForm").addEventListener("submit", (event) => {
         event.preventDefault();
         const name = document.getElementById("studentName").value.trim();
@@ -2194,10 +2240,21 @@
         const className = document.getElementById("studentClass").value;
         const goal = document.getElementById("studentGoal").value;
         const concern = document.getElementById("studentConcern").value.trim() || "Need academic guidance";
+        const action = event.submitter?.dataset.action || "save";
         const message = `Hello Genesis Educates, I want to discuss a study plan.%0AStudent: ${encodeURIComponent(name)}%0AParent phone: ${encodeURIComponent(phone)}%0AClass: ${encodeURIComponent(className)}%0AGoal: ${encodeURIComponent(goal)}%0AConcern: ${encodeURIComponent(concern)}`;
 
+        submitStudyPlanToGoogle({ name, phone, className, goal, concern });
         document.getElementById("formMessage").style.display = "block";
-        window.open(`https://wa.me/919041056405?text=${message}`, "_blank", "noopener,noreferrer");
+        document.getElementById("formMessage").textContent =
+          action === "whatsapp"
+            ? "Inquiry saved. Opening WhatsApp with your study plan request."
+            : "Thank you. Your study plan inquiry has been submitted.";
+
+        if (action === "whatsapp") {
+          setTimeout(() => {
+            window.open(`https://wa.me/919041056405?text=${message}`, "_blank", "noopener,noreferrer");
+          }, 350);
+        }
       });
     </script>
   </body>
