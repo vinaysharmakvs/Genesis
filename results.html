@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Genesis Educates champions and achievers from 2021-25: IIT, PEC, BITS, NEET, GMCH, IISER, DTU, UIET and more."
+    />
+    <title>Genesis Champions 2021-25 | Results</title>
+    <link rel="icon" href="public/favicon.svg" type="image/svg+xml" />
+    <style>
+      :root {
+        --navy: #071a3d;
+        --blue: #123f86;
+        --gold: #d8ad49;
+        --gold-2: #f7d980;
+        --cream: #fff6e3;
+        --white: #ffffff;
+        --ink: #0c1730;
+        --muted: #d7e3ff;
+        --glass: rgba(255, 255, 255, 0.1);
+        --line: rgba(255, 255, 255, 0.18);
+        --shadow: 0 28px 90px rgba(0, 0, 0, 0.32);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--navy);
+        color: var(--white);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body::before {
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        content: "";
+        background:
+          radial-gradient(circle at 12% 12%, rgba(247, 217, 128, 0.22), transparent 24rem),
+          radial-gradient(circle at 88% 8%, rgba(45, 122, 255, 0.3), transparent 28rem),
+          linear-gradient(135deg, #071a3d 0%, #0b2559 52%, #061329 100%);
+      }
+
+      body::after {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        content: "";
+        opacity: 0.14;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+        background-size: 64px 64px;
+        mask-image: linear-gradient(to bottom, #000, transparent 78%);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      .top-strip {
+        padding: 10px 16px;
+        background: linear-gradient(90deg, var(--gold), var(--gold-2));
+        color: var(--ink);
+        font-weight: 950;
+        text-align: center;
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        width: min(1180px, calc(100% - 28px));
+        margin: 14px auto 0;
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        background: rgba(7, 26, 61, 0.78);
+        box-shadow: 0 16px 50px rgba(0, 0, 0, 0.18);
+        backdrop-filter: blur(18px);
+      }
+
+      .header-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 12px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand-logo {
+        display: block;
+        width: 52px;
+        height: 52px;
+        border: 2px solid rgba(247, 217, 128, 0.6);
+        border-radius: 16px;
+        background: var(--white);
+        box-shadow: 0 12px 28px rgba(216, 173, 73, 0.2);
+        object-fit: contain;
+        padding: 4px;
+      }
+
+      .brand strong,
+      .brand small {
+        display: block;
+        line-height: 1;
+      }
+
+      .brand strong {
+        font-size: 1.2rem;
+      }
+
+      .brand small {
+        margin-top: 4px;
+        color: var(--gold-2);
+        font-weight: 850;
+      }
+
+      nav {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        color: rgba(255, 255, 255, 0.82);
+        font-weight: 850;
+      }
+
+      nav a:hover {
+        color: var(--gold-2);
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        border: 0;
+        border-radius: 999px;
+        padding: 13px 20px;
+        cursor: pointer;
+        font-weight: 950;
+        transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+      }
+
+      .button:hover {
+        transform: translateY(-2px);
+      }
+
+      .primary {
+        background: linear-gradient(135deg, var(--gold), var(--gold-2));
+        color: var(--ink);
+        box-shadow: 0 18px 36px rgba(216, 173, 73, 0.25);
+      }
+
+      .secondary {
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--white);
+      }
+
+      .hero,
+      .section {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 0.58fr);
+        gap: 42px;
+        align-items: center;
+        padding: 82px 0 72px;
+      }
+
+      .eyebrow {
+        margin: 0 0 14px;
+        color: var(--gold-2);
+        font-size: 0.86rem;
+        font-weight: 950;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 18px;
+        font-size: clamp(3.2rem, 8vw, 7rem);
+        line-height: 0.9;
+        letter-spacing: -0.03em;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        margin-bottom: 16px;
+        font-size: clamp(2.25rem, 5vw, 4.4rem);
+        line-height: 0.95;
+        letter-spacing: -0.03em;
+        text-transform: uppercase;
+      }
+
+      h1 span,
+      h2 span,
+      h3 {
+        color: var(--gold-2);
+      }
+
+      p {
+        color: var(--muted);
+        font-size: 1.05rem;
+        line-height: 1.7;
+      }
+
+      .hero p:not(.eyebrow) {
+        max-width: 760px;
+        font-size: clamp(1.08rem, 2vw, 1.28rem);
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .hero-panel,
+      .card,
+      .filter-panel,
+      .story-card,
+      .modal-card {
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.09);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(16px);
+      }
+
+      .hero-panel {
+        position: relative;
+        border-radius: 34px;
+        padding: 28px;
+        overflow: hidden;
+      }
+
+      .hero-panel::before {
+        position: absolute;
+        right: -90px;
+        top: -90px;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        content: "";
+        background: rgba(247, 217, 128, 0.22);
+      }
+
+      .hero-panel strong {
+        display: block;
+        color: var(--gold-2);
+        font-size: clamp(3rem, 8vw, 5.4rem);
+        line-height: 0.9;
+      }
+
+      .hero-panel span {
+        display: block;
+        margin-top: 12px;
+        color: var(--white);
+        font-size: 1.35rem;
+        font-weight: 950;
+      }
+
+      .section {
+        padding: 70px 0;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .card {
+        border-radius: 26px;
+        padding: 24px;
+      }
+
+      .card strong {
+        display: block;
+        color: var(--gold-2);
+        font-size: clamp(2rem, 4vw, 3rem);
+        line-height: 1;
+      }
+
+      .card span {
+        display: block;
+        margin-top: 10px;
+        color: var(--muted);
+        font-weight: 850;
+      }
+
+      .filter-panel {
+        position: sticky;
+        top: 104px;
+        z-index: 10;
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr);
+        gap: 16px;
+        align-items: center;
+        border-radius: 28px;
+        padding: 16px;
+      }
+
+      .search {
+        width: 100%;
+        min-height: 50px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.94);
+        color: var(--ink);
+        padding: 12px 18px;
+        outline: none;
+      }
+
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
+      .filter-btn {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--white);
+        cursor: pointer;
+        padding: 11px 14px;
+        font-weight: 900;
+      }
+
+      .filter-btn.active {
+        background: linear-gradient(135deg, var(--gold), var(--gold-2));
+        color: var(--ink);
+      }
+
+      .results-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin: 18px 0 24px;
+        color: var(--muted);
+        font-weight: 850;
+      }
+
+      .stories-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .story-card {
+        position: relative;
+        display: grid;
+        min-height: 330px;
+        border-radius: 28px;
+        padding: 22px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+      }
+
+      .story-card::after {
+        position: absolute;
+        right: -40px;
+        bottom: -54px;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        content: "";
+        background: rgba(216, 173, 73, 0.16);
+        transition: transform 0.3s ease, background 0.3s ease;
+      }
+
+      .story-card:hover {
+        transform: translateY(-7px);
+        border-color: rgba(247, 217, 128, 0.72);
+        background: rgba(255, 255, 255, 0.13);
+      }
+
+      .story-card:hover::after {
+        transform: scale(1.28);
+        background: rgba(247, 217, 128, 0.24);
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .tag {
+        border-radius: 999px;
+        background: rgba(247, 217, 128, 0.14);
+        color: var(--gold-2);
+        padding: 7px 10px;
+        font-size: 0.76rem;
+        font-weight: 950;
+        text-transform: uppercase;
+      }
+
+      .story-card h3 {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 12px;
+        color: var(--white);
+        font-size: 1.65rem;
+        line-height: 1.05;
+      }
+
+      .story-card .result {
+        position: relative;
+        z-index: 1;
+        color: var(--gold-2);
+        font-size: 1.12rem;
+        font-weight: 950;
+      }
+
+      .story-card p {
+        position: relative;
+        z-index: 1;
+        margin-top: 12px;
+        font-size: 0.96rem;
+      }
+
+      .story-card button {
+        position: relative;
+        z-index: 1;
+        align-self: end;
+        justify-self: start;
+        margin-top: 18px;
+        border: 0;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        color: var(--white);
+        cursor: pointer;
+        padding: 10px 14px;
+        font-weight: 950;
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: none;
+        place-items: center;
+        background: rgba(2, 7, 20, 0.72);
+        padding: 18px;
+      }
+
+      .modal.open {
+        display: grid;
+      }
+
+      .modal-card {
+        width: min(760px, 100%);
+        max-height: min(760px, 92vh);
+        border-radius: 32px;
+        padding: 28px;
+        overflow: auto;
+      }
+
+      .modal-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: start;
+      }
+
+      .close-btn {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--white);
+        cursor: pointer;
+        font-size: 1.3rem;
+        font-weight: 950;
+      }
+
+      .journey-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .journey-grid div {
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 16px;
+      }
+
+      .journey-grid strong {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--gold-2);
+      }
+
+      .footer {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+        border-top: 1px solid var(--line);
+        padding: 42px 0 64px;
+      }
+
+      .footer-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 22px;
+      }
+
+      .branches {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .branches span {
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 15px;
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.7s ease, transform 0.7s ease;
+      }
+
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @media (max-width: 980px) {
+        .header-inner,
+        nav {
+          flex-wrap: wrap;
+        }
+
+        .hero,
+        .filter-panel,
+        .footer-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .filters {
+          justify-content: flex-start;
+        }
+
+        .metrics,
+        .stories-grid,
+        .journey-grid,
+        .branches {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 620px) {
+        .top-strip {
+          font-size: 0.82rem;
+        }
+
+        .site-header,
+        .hero,
+        .section,
+        .footer {
+          width: min(100% - 24px, 1180px);
+        }
+
+        nav {
+          gap: 12px;
+          font-size: 0.9rem;
+        }
+
+        h1 {
+          font-size: 3.1rem;
+        }
+
+        h2 {
+          font-size: 2.35rem;
+        }
+
+        .metrics,
+        .stories-grid,
+        .journey-grid,
+        .branches {
+          grid-template-columns: 1fr;
+        }
+
+        .results-meta {
+          display: grid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top-strip">Champions 2021-25 - 100+ selections from small batches</div>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="index.html" aria-label="Genesis Educates home">
+          <img class="brand-logo" src="assets/genesis_logo.jpeg" alt="Genesis Educates logo" />
+          <span>
+            <strong>Genesis</strong>
+            <small>Educates</small>
+          </span>
+        </a>
+        <nav aria-label="Primary navigation">
+          <a href="index.html">Home</a>
+          <a href="#champions">Champions</a>
+          <a href="#filters">Explore Results</a>
+          <a href="index.html#study-plan">Counselling</a>
+        </nav>
+        <a class="button primary" href="tel:9041056405">Call Now</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="champions">
+        <div class="reveal">
+          <p class="eyebrow">Genesis Champions 2021-25</p>
+          <h1>Small Batches. <span>Big Results.</span></h1>
+          <p>
+            From aspiration to achievement: student stories across IIT, PEC,
+            BITS, NEET, GMCH, IISER, DTU, UIET, Thapar, VIT and more.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#filters">Explore Champions</a>
+            <a class="button secondary" href="index.html">Back to Main Website</a>
+          </div>
+        </div>
+        <aside class="hero-panel reveal">
+          <p class="eyebrow">2021-25</p>
+          <strong>100+</strong>
+          <span>Selections from focused small batches</span>
+          <p>Every story reflects structure, mentorship, discipline and visible student growth.</p>
+        </aside>
+      </section>
+
+      <section class="section metrics">
+        <article class="card reveal"><strong id="totalStories">0</strong><span>Featured achiever stories</span></article>
+        <article class="card reveal"><strong>IIT</strong><span>Bombay, Kanpur, Ropar, Mandi</span></article>
+        <article class="card reveal"><strong>PEC</strong><span>CSE, Computer Engineering and engineering selections</span></article>
+        <article class="card reveal"><strong>NEET</strong><span>Medical college and research success stories</span></article>
+      </section>
+
+      <section class="section" id="filters">
+        <div class="filter-panel reveal">
+          <input class="search" id="searchInput" type="search" placeholder="Search by name, college, exam or story..." />
+          <div class="filters" id="filtersList">
+            <button class="filter-btn active" type="button" data-filter="All">All</button>
+            <button class="filter-btn" type="button" data-filter="IIT">IIT</button>
+            <button class="filter-btn" type="button" data-filter="Engineering">Engineering</button>
+            <button class="filter-btn" type="button" data-filter="Medical">Medical</button>
+            <button class="filter-btn" type="button" data-filter="JEE">JEE</button>
+            <button class="filter-btn" type="button" data-filter="Growth">Growth Stories</button>
+          </div>
+        </div>
+
+        <div class="results-meta">
+          <span id="resultCount">Showing all achievers</span>
+          <span>Click any card to view the journey</span>
+        </div>
+
+        <div class="stories-grid" id="storiesGrid"></div>
+      </section>
+    </main>
+
+    <div class="modal" id="storyModal" aria-hidden="true">
+      <article class="modal-card">
+        <div class="modal-top">
+          <div>
+            <p class="eyebrow" id="modalCategory">Genesis Achiever</p>
+            <h2 id="modalName">Student Name</h2>
+          </div>
+          <button class="close-btn" type="button" id="closeModal" aria-label="Close result story">x</button>
+        </div>
+        <h3 id="modalResult">Result</h3>
+        <p id="modalSummary"></p>
+        <div class="journey-grid">
+          <div><strong>Initial Struggle</strong><p id="modalStruggle"></p></div>
+          <div><strong>Turning Point</strong><p id="modalTurning"></p></div>
+          <div><strong>Final Result</strong><p id="modalFinal"></p></div>
+        </div>
+      </article>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-grid">
+        <div>
+          <p class="eyebrow">Genesis Educates</p>
+          <h2>We make champions.</h2>
+          <a class="button primary" href="tel:9041056405">9041056405 | 7696016405</a>
+        </div>
+        <div class="branches">
+          <span>SCO-293 & 294, Sector 20, Panchkula</span>
+          <span>SCO-13, Sector 15, Panchkula</span>
+          <span>SCO-17, Near Dominos, VIP Road, Zirakpur</span>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const stories = [
+        { name: "Raghav", category: "JEE", tags: ["Engineering", "JEE", "Growth"], result: "98.9 percentile in JEE Main - PEC CSE", summary: "Raw potential became focused performance through disciplined mentoring and premium batch guidance.", struggle: "Sharp intelligence, but weak direction and difficulty in Chemistry and Biology.", turning: "Consistent mentoring, structured study habits and focused weak-area support.", final: "Scored 98.9 percentile in JEE Main and secured PEC CSE." },
+        { name: "Arjun", category: "IIT", tags: ["IIT", "Engineering", "Growth"], result: "IIT Bombay - Computer Science", summary: "Self-doubt was replaced by confidence, clarity and elite academic performance.", struggle: "Bright student, but exam anxiety and self-doubt affected performance.", turning: "Micro-batch mentoring, structured planning and steady confidence-building.", final: "Secured Computer Science at IIT Bombay." },
+        { name: "Suneeti", category: "JEE", tags: ["Engineering", "JEE"], result: "94.2 percentile - PEC CSE", summary: "Consistency and disciplined preparation helped her earn a prestigious PEC seat.", struggle: "Sincere and steady, but needed time to understand advanced concepts.", turning: "Regular classes, tests, doubt clearing and continuous mentoring.", final: "Scored 94.2 percentile in JEE Main 2025 and secured PEC." },
+        { name: "Shaurya", category: "Medical", tags: ["Medical", "NEET", "Growth"], result: "NEET 2025 selection", summary: "Direction and mentorship turned overwhelm into disciplined medical preparation.", struggle: "Good potential but unclear direction and pressure from NEET demands.", turning: "Regular doubt-clearing, personalized feedback and structured support.", final: "Qualified NEET 2025 after three years of focused growth." },
+        { name: "Pari", category: "Engineering", tags: ["Engineering", "Growth"], result: "Government seat at CCET Chandigarh - CSE", summary: "Weak fundamentals became a government engineering seat through consistency.", struggle: "Joined Class 11 with weak non-medical fundamentals.", turning: "Attended every class, completed assignments and rebuilt basics patiently.", final: "Secured a government seat in CCET Chandigarh CSE." },
+        { name: "Dhruv", category: "Medical", tags: ["Medical", "NEET", "Growth"], result: "NEET 2025 selection - MBBS", summary: "A 65 percent board score became an MBBS journey through structured guidance.", struggle: "Motivated but unsure, with a 65 percent starting point.", turning: "Personalized plans, doubt-clearing and constant mentorship.", final: "Cleared NEET 2025 and secured an MBBS seat." },
+        { name: "Mananpreet", category: "JEE", tags: ["Engineering", "JEE", "Growth"], result: "JEE Main qualifier - top engineering college", summary: "Average performance improved through memory techniques, planning and feedback.", struggle: "Average grades, poor retention and unclear study techniques.", turning: "Mind-mapping, personalized schedule, regular tests and feedback.", final: "Cracked JEE Main on the first attempt and entered a top engineering college." },
+        { name: "Harsh Dalal", category: "Engineering", tags: ["Engineering", "Growth"], result: "BITS Pilani - Engineering", summary: "Digital distraction was replaced by focus, mindfulness and love for Physics.", struggle: "Social media and gaming distraction affected academics.", turning: "Structured schedule, mindfulness, motivation and continuous mentor support.", final: "Secured admission to BITS Pilani." },
+        { name: "Apoorav", category: "Engineering", tags: ["Engineering", "Growth"], result: "PEC - Engineering", summary: "A shy introvert grew into a confident communicator and leader.", struggle: "Bright but extremely shy, with difficulty expressing ideas.", turning: "Public speaking, mentorship and small leadership opportunities.", final: "Improved communication and secured PEC Engineering." },
+        { name: "Pratibha", category: "IIT", tags: ["IIT", "Engineering", "Growth"], result: "IIT Ropar", summary: "A serious health setback became a comeback story through flexible academic support.", struggle: "Hospitalized in Class 11 and missed crucial classes.", turning: "Customized catch-up plan, one-to-one sessions and emotional support.", final: "Recovered academically and secured IIT Ropar." },
+        { name: "Yug", category: "IIT", tags: ["IIT", "Engineering", "Growth"], result: "IIT Mandi", summary: "A late starter caught up through accelerated planning and frequent testing.", struggle: "Joined late in Class 11 with incomplete preparation.", turning: "Gap analysis, accelerated curriculum and personalized extra hours.", final: "Secured admission to IIT Mandi." },
+        { name: "Ishika & Preeti", category: "Medical", tags: ["Medical", "NEET"], result: "KGK Medical College - NEET 2024", summary: "Two students from Dharamshala cleared NEET through friendship, discipline and counselling.", struggle: "Hostel adjustment, language barriers and demanding NEET preparation.", turning: "Mutual support, no social media for two years and guided counselling.", final: "Both secured seats in the same government medical college." },
+        { name: "Savanyu Panjeta", category: "Engineering", tags: ["Engineering", "Growth"], result: "NIT Kurukshetra - AI/ML", summary: "Career confusion became clarity in Artificial Intelligence and Machine Learning.", struggle: "Strong student but confused by too many career options.", turning: "Aptitude testing, career exploration and mentor-led discussions.", final: "Secured NIT Kurukshetra in AI/ML Engineering." },
+        { name: "Aman Sood", category: "Engineering", tags: ["Engineering"], result: "PEC - CSE", summary: "Academics and music were balanced through flexible planning and time management.", struggle: "Wanted to pursue academics while continuing guitar seriously.", turning: "Flexible study plan and time-management support.", final: "Secured PEC CSE while continuing music." },
+        { name: "Manya Gupta", category: "JEE", tags: ["Engineering", "JEE", "Growth"], result: "99.2 percentile - MNIT Jaipur", summary: "A dramatic comeback from 60 percentile to 99.2 percentile in three months.", struggle: "Exceptional IQ but inconsistency and low self-study discipline.", turning: "Daily tracking, assignments, mock tests and a strict comeback plan.", final: "Jumped to 99.2 percentile and secured MNIT Jaipur." },
+        { name: "Vansh", category: "Engineering", tags: ["Engineering", "Growth"], result: "BITS Pilani", summary: "Exam anxiety was managed through mocks, counselling and confidence-building.", struggle: "Bright and sincere, but pressure affected performance.", turning: "Mock tests, stress counselling and group confidence exercises.", final: "Earned his place at BITS Pilani." },
+        { name: "Garima", category: "Engineering", tags: ["Engineering"], result: "BITS Pilani", summary: "A focused student learned adaptability beyond fixed exam patterns.", struggle: "Strong academics but struggled when patterns changed.", turning: "Conceptual depth, flexibility and unexpected-question practice.", final: "Secured admission to BITS Pilani." },
+        { name: "Manya Gupta", category: "IIT", tags: ["IIT", "Engineering"], result: "IIT Kanpur", summary: "Exceptional intelligence became consistent success through daily tracking.", struggle: "High potential but irregular self-study and low motivation.", turning: "Daily tracking, assignments, close monitoring and motivation.", final: "Secured IIT Kanpur." },
+        { name: "Mihir", category: "Engineering", tags: ["Engineering", "Growth"], result: "UIET Chandigarh", summary: "Frequent motivation and center-based study helped rebuild consistency.", struggle: "Sincere but struggled to maintain focus consistently.", turning: "Regular counselling, structured plan and study at the centre.", final: "Cleared JEE Main and secured UIET Chandigarh." },
+        { name: "Gungun", category: "Architecture", tags: ["Engineering", "Growth"], result: "CCA Chandigarh - Architecture", summary: "An architecture-focused path was supported instead of forcing a JEE track.", struggle: "Wanted architecture, but needed the right preparation direction.", turning: "Reasoning, aptitude, math support and NATA guidance.", final: "Cleared NATA and secured CCA Chandigarh." },
+        { name: "Rashi", category: "Engineering", tags: ["Engineering", "Growth"], result: "VIT Vellore", summary: "Wellness and academic planning helped reduce exam anxiety.", struggle: "Online learning and pre-exam anxiety affected health and performance.", turning: "Nutrition guidance, stress-management and academic structure.", final: "Secured a coveted seat at VIT." },
+        { name: "Oorjit", category: "Engineering", tags: ["Engineering", "Growth"], result: "DTU selection", summary: "Chapter-wise micro-targets helped turn self-doubt into confidence.", struggle: "Hardworking but self-doubt affected objective-type performance.", turning: "Personalized exam plan and regular motivation sessions.", final: "Cleared DTU." },
+        { name: "Divyansh", category: "Engineering", tags: ["Engineering", "Growth"], result: "Punjab Engineering College", summary: "Close monitoring helped rebuild discipline after pandemic distractions.", struggle: "Mobile gaming and low focus during online learning.", turning: "Offline assignments, close monitoring and mentor check-ins.", final: "Secured Punjab Engineering College." },
+        { name: "Sparsh", category: "NDA", tags: ["Engineering", "JEE", "Growth"], result: "UIET + NDA qualifier", summary: "Confusion between JEE and NDA became clarity through streamlined resources.", struggle: "Unsure between JEE Main and NDA, with too many resources.", turning: "Book streamlining, counselling and disciplined planning.", final: "Qualified NDA and secured UIET." },
+        { name: "Swayam Jain", category: "Engineering", tags: ["Engineering", "Growth"], result: "Punjab Engineering College", summary: "A structured study-slot system helped him stay balanced and consistent.", struggle: "Online environment made mentor connection and motivation difficult.", turning: "Separate slots for homework, assignments and new concepts.", final: "Secured Punjab Engineering College." },
+        { name: "Sambhav", category: "Engineering", tags: ["Engineering", "Growth"], result: "PEC", summary: "Student seminars and mentoring turned shyness into interview confidence.", struggle: "Academically strong but hesitant and under-confident.", turning: "Public speaking, one-to-one support and leadership roles.", final: "Secured a seat at PEC." },
+        { name: "Eshaan Walia", category: "Engineering", tags: ["Engineering", "Growth"], result: "Thapar Institute of Engineering & Technology", summary: "Screen discipline and mental well-being support helped rebuild momentum.", struggle: "Online learning, mobile games and lack of structure caused a performance crash.", turning: "Routine review, distraction tracking and healthy screen breaks.", final: "Secured Thapar Institute of Engineering & Technology." },
+        { name: "Samya", category: "Medical", tags: ["Medical", "NEET", "Growth"], result: "99.5 percentile - GMCH Chandigarh", summary: "Self-doubt transformed into a remarkable medical success story.", struggle: "Highly intelligent but confused between research and NEET.", turning: "Five years of patient mentorship and clarity from Sahil Sir.", final: "Scored 99.5 percentile and secured GMCH Chandigarh." },
+        { name: "Jashanpreet", category: "Engineering", tags: ["Engineering"], result: "Punjab Engineering College", summary: "A cheerful personality found the right academic direction and focus.", struggle: "Outgoing nature sometimes created distractions.", turning: "Structured guidance, motivation and academic routine.", final: "Secured Punjab Engineering College." },
+        { name: "Adarsh", category: "JEE", tags: ["Engineering", "JEE", "Growth"], result: "97+ percentile in JEE Main", summary: "Raw talent became JEE success through discipline and resilience.", struggle: "Exceptional intelligence but lacked JEE-level study discipline.", turning: "Structured JEE plan after Class 10 boards.", final: "Scored 97+ percentile in JEE Main." },
+        { name: "Kunal", category: "Medical", tags: ["Medical", "NEET"], result: "IISER Mohali + NEET qualifier", summary: "A research-focused medical student achieved dual success.", struggle: "Highly disciplined, with a fixed research goal from the start.", turning: "Genesis advised NEET preparation to sharpen his overall track.", final: "Cleared NEET and secured IISER Mohali." },
+        { name: "Vidul Garg", category: "Engineering", tags: ["Engineering", "JEE", "Growth"], result: "93.75 percentile - BITS Pilani", summary: "Maths fear became a strength through extra classes and self-study.", struggle: "Barely passing in mathematics during early years.", turning: "Chose mathematics, took extra classes and followed structured plans.", final: "Scored 93.75 percentile and joined BITS Pilani." },
+        { name: "Ravinder", category: "Engineering", tags: ["Engineering", "Growth"], result: "Thapar Institute of Engineering", summary: "A quiet backbencher gained confidence and academic momentum.", struggle: "Late joiner, quiet and hesitant to ask doubts.", turning: "Extra support after class and consistent encouragement.", final: "Excelled in boards and secured Thapar Institute of Engineering." },
+        { name: "Aryan Goyal", category: "JEE", tags: ["Engineering", "JEE"], result: "97.85 percentile - Punjab Engineering College", summary: "Talent met direction through a balanced school and self-study plan.", struggle: "Brilliant mind but needed clear direction.", turning: "Personalized plan balancing school and self-study.", final: "Scored 97.85 percentile and secured Punjab Engineering College." },
+        { name: "Vibhav", category: "JEE", tags: ["Engineering", "JEE", "Growth"], result: "97.2 percentile in JEE Main", summary: "A reserved student grew through smaller teams and active participation.", struggle: "Introverted and inconsistent at the start of Class 11.", turning: "Smaller teams, doubt-solving and focused discussions.", final: "Scored 97.2 percentile in JEE Main." },
+        { name: "Manik Goyal", category: "JEE", tags: ["Engineering", "JEE", "Growth"], result: "94.3 percentile - Punjab Engineering College", summary: "A playful student developed focus and discipline in PCM.", struggle: "Mischievous and casual, with minimal self-study.", turning: "Peer inspiration, mentor guidance and regular assignments.", final: "Scored 94.3 percentile and joined Punjab Engineering College." },
+        { name: "Archit", category: "JEE", tags: ["Engineering", "JEE"], result: "98.77 percentile - PEC Computer Engineering", summary: "A school topper stayed balanced through competitive exam pressure.", struggle: "Needed motivation and direction under competitive pressure.", turning: "Timely assignments, part tests and focused mentorship.", final: "Scored 98.77 percentile and secured PEC Computer Engineering." },
+        { name: "Manik Aggarwal", category: "IIT", tags: ["IIT", "Engineering", "Growth"], result: "IIT Mandi", summary: "A quiet mathematics lover became an IITian through sustained mentoring.", struggle: "Quiet, introverted and unsure of his own ability.", turning: "Core concept strengthening, advanced problem-solving and motivation.", final: "Secured IIT Mandi." },
+        { name: "Aayan", category: "JEE", tags: ["Engineering", "JEE", "Growth"], result: "96.2 percentile - Punjab Engineering College", summary: "Daily self-study reporting helped restore focus after pandemic distractions.", struggle: "Class 11 distractions affected focus and performance.", turning: "Parent support and daily progress reporting to mentors.", final: "Scored 96.2 percentile and secured Punjab Engineering College." }
+      ];
+
+      const grid = document.getElementById("storiesGrid");
+      const count = document.getElementById("resultCount");
+      const searchInput = document.getElementById("searchInput");
+      const totalStories = document.getElementById("totalStories");
+      let activeFilter = "All";
+
+      totalStories.textContent = stories.length;
+
+      const matchesFilter = (story) => activeFilter === "All" || story.category === activeFilter || story.tags.includes(activeFilter);
+
+      const matchesSearch = (story) => {
+        const query = searchInput.value.trim().toLowerCase();
+        if (!query) return true;
+        return [story.name, story.category, story.result, story.summary, story.tags.join(" ")].join(" ").toLowerCase().includes(query);
+      };
+
+      const renderStories = () => {
+        const filtered = stories.filter((story) => matchesFilter(story) && matchesSearch(story));
+        count.textContent = `Showing ${filtered.length} of ${stories.length} achiever stories`;
+        grid.innerHTML = filtered.map((story, index) => `
+          <article class="story-card reveal visible" data-index="${stories.indexOf(story)}">
+            <div class="tag-row">
+              <span class="tag">${story.category}</span>
+              ${story.tags.slice(0, 2).map((tag) => `<span class="tag">${tag}</span>`).join("")}
+            </div>
+            <h3>${story.name}</h3>
+            <div class="result">${story.result}</div>
+            <p>${story.summary}</p>
+            <button type="button">View Journey</button>
+          </article>
+        `).join("");
+      };
+
+      document.getElementById("filtersList").addEventListener("click", (event) => {
+        const button = event.target.closest(".filter-btn");
+        if (!button) return;
+        document.querySelectorAll(".filter-btn").forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        activeFilter = button.dataset.filter;
+        renderStories();
+      });
+
+      searchInput.addEventListener("input", renderStories);
+
+      const modal = document.getElementById("storyModal");
+      const openStory = (story) => {
+        document.getElementById("modalCategory").textContent = `Genesis Achiever - ${story.category}`;
+        document.getElementById("modalName").textContent = story.name;
+        document.getElementById("modalResult").textContent = story.result;
+        document.getElementById("modalSummary").textContent = story.summary;
+        document.getElementById("modalStruggle").textContent = story.struggle;
+        document.getElementById("modalTurning").textContent = story.turning;
+        document.getElementById("modalFinal").textContent = story.final;
+        modal.classList.add("open");
+        modal.setAttribute("aria-hidden", "false");
+      };
+
+      grid.addEventListener("click", (event) => {
+        const card = event.target.closest(".story-card");
+        if (!card) return;
+        openStory(stories[Number(card.dataset.index)]);
+      });
+
+      const closeModal = () => {
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden", "true");
+      };
+
+      document.getElementById("closeModal").addEventListener("click", closeModal);
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) closeModal();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeModal();
+      });
+
+      const revealObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.14 }
+      );
+
+      document.querySelectorAll(".reveal").forEach((item) => revealObserver.observe(item));
+      renderStories();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,2071 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Genesis Educates is Tri-City's trusted academic institution since 2009, offering coaching for Classes 8-12, Boards, JEE, NEET and NDA."
+    />
+    <title>Genesis Educates | Where Every Child Is Visible</title>
+    <link rel="icon" href="public/favicon.svg" type="image/svg+xml" />
+    <style>
+      :root {
+        --navy: #071a3d;
+        --blue: #123f86;
+        --blue-soft: #1c58ae;
+        --gold: #d8ad49;
+        --gold-2: #f7d980;
+        --cream: #fff6e3;
+        --white: #ffffff;
+        --ink: #0c1730;
+        --muted: #d7e3ff;
+        --glass: rgba(255, 255, 255, 0.1);
+        --line: rgba(255, 255, 255, 0.18);
+        --shadow: 0 28px 90px rgba(0, 0, 0, 0.32);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--navy);
+        color: var(--white);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body::before {
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        content: "";
+        background:
+          radial-gradient(circle at 12% 12%, rgba(247, 217, 128, 0.2), transparent 25rem),
+          radial-gradient(circle at 88% 8%, rgba(45, 122, 255, 0.3), transparent 28rem),
+          linear-gradient(135deg, #071a3d 0%, #0b2559 50%, #061329 100%);
+      }
+
+      body::after {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        content: "";
+        opacity: 0.18;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+        background-size: 64px 64px;
+        mask-image: linear-gradient(to bottom, #000, transparent 78%);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      .top-strip {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        padding: 10px 16px;
+        background: linear-gradient(90deg, var(--gold), var(--gold-2));
+        color: var(--ink);
+        font-size: 0.92rem;
+        font-weight: 900;
+        text-align: center;
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        width: min(1180px, calc(100% - 28px));
+        margin: 14px auto 0;
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        background: rgba(7, 26, 61, 0.76);
+        box-shadow: 0 16px 50px rgba(0, 0, 0, 0.18);
+        backdrop-filter: blur(18px);
+      }
+
+      .header-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 12px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand-mark {
+        display: grid;
+        place-items: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, var(--gold), var(--gold-2));
+        color: var(--ink);
+        box-shadow: 0 12px 28px rgba(216, 173, 73, 0.28);
+        font-size: 1.55rem;
+        font-weight: 950;
+      }
+
+      .brand-logo {
+        display: block;
+        width: 52px;
+        height: 52px;
+        border: 2px solid rgba(247, 217, 128, 0.6);
+        border-radius: 16px;
+        background: var(--white);
+        box-shadow: 0 12px 28px rgba(216, 173, 73, 0.2);
+        object-fit: contain;
+        padding: 4px;
+      }
+
+      .brand strong,
+      .brand small {
+        display: block;
+        line-height: 1;
+      }
+
+      .brand strong {
+        font-size: 1.2rem;
+      }
+
+      .brand small {
+        margin-top: 4px;
+        color: var(--gold-2);
+        font-weight: 850;
+      }
+
+      nav {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 0.95rem;
+        font-weight: 800;
+      }
+
+      nav a {
+        transition: color 0.25s ease, transform 0.25s ease;
+      }
+
+      nav a:hover {
+        color: var(--gold-2);
+        transform: translateY(-1px);
+      }
+
+      .menu-button {
+        display: none;
+        border: 0;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--white);
+        padding: 10px 14px;
+        font-weight: 900;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        border: 0;
+        border-radius: 999px;
+        padding: 13px 20px;
+        cursor: pointer;
+        font-weight: 950;
+        transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+      }
+
+      .button:hover {
+        transform: translateY(-2px);
+      }
+
+      .primary {
+        background: linear-gradient(135deg, var(--gold), var(--gold-2));
+        color: var(--ink);
+        box-shadow: 0 18px 36px rgba(216, 173, 73, 0.25);
+      }
+
+      .secondary {
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--white);
+      }
+
+      .hero {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(360px, 0.82fr);
+        gap: 54px;
+        align-items: center;
+        width: min(1180px, calc(100% - 32px));
+        min-height: calc(100vh - 88px);
+        margin: 0 auto;
+        padding: 80px 0 96px;
+      }
+
+      .hero::before {
+        position: absolute;
+        right: -8%;
+        top: 14%;
+        z-index: -1;
+        width: 360px;
+        height: 360px;
+        border-radius: 50%;
+        content: "";
+        background: rgba(216, 173, 73, 0.14);
+        filter: blur(12px);
+      }
+
+      .eyebrow {
+        margin: 0 0 14px;
+        color: var(--gold-2);
+        font-size: 0.86rem;
+        font-weight: 950;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 820px;
+        margin-bottom: 18px;
+        font-size: clamp(3.4rem, 8.4vw, 7.8rem);
+        line-height: 0.9;
+        letter-spacing: -0.03em;
+        text-transform: uppercase;
+      }
+
+      h1 span,
+      h2 span {
+        color: var(--gold-2);
+      }
+
+      h2 {
+        margin-bottom: 16px;
+        font-size: clamp(2.2rem, 5.4vw, 4.75rem);
+        line-height: 0.95;
+        letter-spacing: -0.03em;
+        text-transform: uppercase;
+      }
+
+      h3 {
+        margin-bottom: 8px;
+        color: var(--gold-2);
+        font-size: 1.12rem;
+      }
+
+      p {
+        color: var(--muted);
+        font-size: 1.05rem;
+        line-height: 1.7;
+      }
+
+      .hero-copy > p:not(.eyebrow) {
+        max-width: 720px;
+        font-size: clamp(1.08rem, 2vw, 1.32rem);
+      }
+
+      .hero-actions,
+      .quick-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .trust-bar {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        max-width: 720px;
+        margin-top: 32px;
+      }
+
+      .trust-bar span {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--glass);
+        padding: 14px;
+        color: rgba(255, 255, 255, 0.88);
+        font-weight: 850;
+      }
+
+      .hero-visual {
+        position: relative;
+        min-height: 560px;
+      }
+
+      .hero-photo-card {
+        position: absolute;
+        inset: 24px 32px auto auto;
+        width: min(360px, 100%);
+        min-height: 520px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 36px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.06)),
+          radial-gradient(circle at 20% 10%, rgba(247, 217, 128, 0.25), transparent 11rem);
+        box-shadow: var(--shadow);
+        padding: 22px;
+        overflow: hidden;
+        transform: rotate(2deg);
+      }
+
+      .phone-top {
+        display: flex;
+        justify-content: space-between;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 0.78rem;
+        font-weight: 900;
+      }
+
+      .score-orbit {
+        display: grid;
+        place-items: center;
+        width: 190px;
+        height: 190px;
+        margin: 34px auto 28px;
+        border: 16px solid rgba(255, 255, 255, 0.12);
+        border-top-color: var(--gold-2);
+        border-right-color: var(--gold);
+        border-radius: 50%;
+        animation: float 4.5s ease-in-out infinite;
+      }
+
+      .score-orbit strong {
+        color: var(--gold-2);
+        font-size: 3rem;
+        line-height: 1;
+      }
+
+      .score-orbit span {
+        display: block;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 0.78rem;
+        font-weight: 900;
+        text-align: center;
+        text-transform: uppercase;
+      }
+
+      .dashboard-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .dashboard-list div {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 14px;
+      }
+
+      .dashboard-list b {
+        color: var(--gold-2);
+      }
+
+      .floating-note {
+        position: absolute;
+        left: 0;
+        bottom: 64px;
+        max-width: 260px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: rgba(255, 246, 227, 0.95);
+        color: var(--ink);
+        box-shadow: var(--shadow);
+        padding: 18px;
+        animation: float 5s ease-in-out infinite;
+      }
+
+      .floating-note strong {
+        display: block;
+        color: var(--blue);
+        font-size: 1.15rem;
+      }
+
+      .floating-note p {
+        margin: 8px 0 0;
+        color: #31415f;
+        font-size: 0.94rem;
+      }
+
+      .section {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 92px 0;
+      }
+
+      .section-heading {
+        max-width: 860px;
+        margin-bottom: 30px;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+        gap: 44px;
+        align-items: center;
+      }
+
+      .glass-card,
+      .problem-card,
+      .metric-card,
+      .system-card,
+      .life-card,
+      .faq details,
+      .study-form {
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.09);
+        box-shadow: 0 20px 70px rgba(0, 0, 0, 0.18);
+        backdrop-filter: blur(14px);
+      }
+
+      .problem-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .problem-card {
+        position: relative;
+        min-height: 178px;
+        border-radius: 24px;
+        padding: 20px;
+        overflow: hidden;
+        transition: transform 0.3s ease, border-color 0.3s ease;
+      }
+
+      .problem-card:hover,
+      .system-card:hover,
+      .life-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(247, 217, 128, 0.58);
+      }
+
+      .problem-card::after {
+        position: absolute;
+        right: -32px;
+        bottom: -44px;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        content: "";
+        background: rgba(216, 173, 73, 0.18);
+      }
+
+      .icon-badge {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        margin-bottom: 18px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, var(--gold), var(--gold-2));
+        color: var(--ink);
+        font-weight: 950;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .metric-card {
+        display: grid;
+        align-content: start;
+        min-width: 0;
+        min-height: 154px;
+        border-radius: 26px;
+        padding: 24px;
+      }
+
+      .metric-card strong {
+        display: block;
+        color: var(--gold-2);
+        overflow-wrap: anywhere;
+        font-size: clamp(2rem, 3.4vw, 3rem);
+        line-height: 1;
+      }
+
+      .metric-card span {
+        display: block;
+        margin-top: 10px;
+        color: var(--muted);
+        font-weight: 800;
+        line-height: 1.32;
+        overflow-wrap: anywhere;
+      }
+
+      .result-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .result-metrics .metric-card {
+        min-height: 170px;
+      }
+
+      .result-metrics .metric-card strong {
+        font-size: clamp(2.15rem, 4vw, 3.4rem);
+      }
+
+      .wide-band {
+        width: 100%;
+        padding-inline: max(16px, calc((100% - 1180px) / 2));
+        background:
+          linear-gradient(180deg, rgba(216, 173, 73, 0.13), rgba(255, 255, 255, 0.04)),
+          rgba(255, 255, 255, 0.02);
+      }
+
+      .system-tabs {
+        display: grid;
+        grid-template-columns: minmax(240px, 0.35fr) minmax(0, 1fr);
+        gap: 18px;
+      }
+
+      .tab-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .tab-button {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--white);
+        cursor: pointer;
+        padding: 16px;
+        text-align: left;
+        font-weight: 900;
+      }
+
+      .tab-button.active {
+        background: linear-gradient(135deg, var(--gold), var(--gold-2));
+        color: var(--ink);
+      }
+
+      .tab-panel {
+        border-radius: 28px;
+        padding: 28px;
+      }
+
+      .tab-panel h3 {
+        font-size: clamp(1.8rem, 4vw, 3.2rem);
+        line-height: 1;
+      }
+
+      .system-grid,
+      .life-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 24px;
+      }
+
+      .system-card,
+      .life-card {
+        min-height: 132px;
+        border-radius: 22px;
+        padding: 18px;
+        transition: transform 0.3s ease, border-color 0.3s ease;
+      }
+
+      .system-card span,
+      .life-card span {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        margin-bottom: 14px;
+        border-radius: 14px;
+        background: rgba(247, 217, 128, 0.16);
+        color: var(--gold-2);
+        font-weight: 950;
+      }
+
+      .campus-photo {
+        position: relative;
+        min-height: 620px;
+        border: 1px solid var(--line);
+        border-radius: 34px;
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: var(--shadow);
+        padding: 12px;
+        overflow: hidden;
+        transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+      }
+
+      .campus-photo img {
+        display: block;
+        width: 100%;
+        height: 596px;
+        border-radius: 25px;
+        object-fit: contain;
+        object-position: center;
+        background: linear-gradient(135deg, rgba(255, 246, 227, 0.12), rgba(18, 63, 134, 0.3));
+        transition: transform 0.45s ease, filter 0.45s ease;
+      }
+
+      .campus-photo::after {
+        position: absolute;
+        inset: 12px;
+        border-radius: 25px;
+        content: "";
+        pointer-events: none;
+        background:
+          linear-gradient(180deg, rgba(7, 26, 61, 0.02), rgba(7, 26, 61, 0.76)),
+          linear-gradient(90deg, rgba(216, 173, 73, 0.18), transparent 55%);
+        transition: background 0.35s ease;
+      }
+
+      .campus-photo:hover {
+        transform: translateY(-8px);
+        border-color: rgba(247, 217, 128, 0.72);
+        box-shadow: 0 34px 95px rgba(216, 173, 73, 0.18);
+      }
+
+      .campus-photo:hover img {
+        filter: saturate(1.08) contrast(1.04);
+        transform: scale(1.015);
+      }
+
+      .campus-photo:hover::after {
+        background:
+          linear-gradient(180deg, rgba(7, 26, 61, 0), rgba(7, 26, 61, 0.58)),
+          linear-gradient(90deg, rgba(247, 217, 128, 0.28), rgba(28, 88, 174, 0.12));
+      }
+
+      .campus-caption {
+        position: absolute;
+        left: 32px;
+        right: 32px;
+        bottom: 30px;
+        z-index: 2;
+      }
+
+      .campus-caption span {
+        display: inline-flex;
+        margin-bottom: 9px;
+        border-radius: 999px;
+        background: rgba(247, 217, 128, 0.18);
+        color: var(--gold-2);
+        padding: 7px 12px;
+        font-size: 0.76rem;
+        font-weight: 950;
+        text-transform: uppercase;
+      }
+
+      .campus-caption strong {
+        display: block;
+        color: var(--white);
+        font-size: clamp(1.6rem, 3vw, 2.4rem);
+        line-height: 1.05;
+      }
+
+      .timeline {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        counter-reset: step;
+      }
+
+      .timeline article {
+        position: relative;
+        display: grid;
+        align-content: space-between;
+        min-height: 330px;
+        border-radius: 26px;
+        border: 1px solid rgba(247, 217, 128, 0.2);
+        background:
+          radial-gradient(circle at 100% 0%, rgba(247, 217, 128, 0.26), transparent 8rem),
+          linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
+        color: var(--white);
+        box-shadow: 0 20px 70px rgba(0, 0, 0, 0.18);
+        padding: 24px;
+        overflow: hidden;
+        transition: transform 0.35s ease, border-color 0.35s ease, background 0.35s ease, box-shadow 0.35s ease;
+      }
+
+      .timeline article::before {
+        position: absolute;
+        right: 18px;
+        top: 18px;
+        counter-increment: step;
+        content: "0" counter(step);
+        color: rgba(247, 217, 128, 0.16);
+        font-size: 4.6rem;
+        font-weight: 950;
+        line-height: 0.8;
+        transition: color 0.35s ease, transform 0.35s ease;
+      }
+
+      .timeline article::after {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 5px;
+        content: "";
+        background: linear-gradient(90deg, var(--gold), var(--gold-2));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.35s ease;
+      }
+
+      .timeline article:hover {
+        transform: translateY(-9px);
+        border-color: rgba(247, 217, 128, 0.76);
+        background:
+          radial-gradient(circle at 100% 0%, rgba(247, 217, 128, 0.34), transparent 9rem),
+          linear-gradient(145deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
+        box-shadow: 0 28px 84px rgba(216, 173, 73, 0.16);
+      }
+
+      .timeline article:hover::before {
+        color: rgba(247, 217, 128, 0.28);
+        transform: translateY(6px) scale(1.06);
+      }
+
+      .timeline article:hover::after {
+        transform: scaleX(1);
+      }
+
+      .seminar-icon {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        place-items: center;
+        width: 58px;
+        height: 58px;
+        margin-bottom: 72px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, var(--gold), var(--gold-2));
+        color: var(--ink);
+        font-size: 1.45rem;
+        font-weight: 950;
+        box-shadow: 0 16px 34px rgba(216, 173, 73, 0.22);
+        transition: transform 0.35s ease;
+      }
+
+      .timeline article:hover .seminar-icon {
+        transform: rotate(-4deg) scale(1.06);
+      }
+
+      .seminar-detail {
+        position: relative;
+        z-index: 1;
+      }
+
+      .timeline strong {
+        display: block;
+        font-size: 1.25rem;
+      }
+
+      .timeline p {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .seminar-chip {
+        display: inline-flex;
+        margin-top: 18px;
+        border-radius: 999px;
+        background: rgba(247, 217, 128, 0.14);
+        color: var(--gold-2);
+        padding: 8px 11px;
+        font-size: 0.76rem;
+        font-weight: 950;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+
+      .video-section {
+        display: grid;
+        gap: 28px;
+      }
+
+      .video-head {
+        display: grid;
+        grid-template-columns: minmax(0, 0.8fr) auto;
+        gap: 24px;
+        align-items: end;
+      }
+
+      .video-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .video-card {
+        position: relative;
+        border: 1px solid rgba(247, 217, 128, 0.28);
+        border-radius: 28px;
+        background:
+          linear-gradient(135deg, rgba(247, 217, 128, 0.16), rgba(255, 255, 255, 0.06)),
+          rgba(255, 255, 255, 0.08);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: transform 0.32s ease, border-color 0.32s ease, background 0.32s ease;
+      }
+
+      .video-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(247, 217, 128, 0.78);
+        background:
+          linear-gradient(135deg, rgba(247, 217, 128, 0.24), rgba(255, 255, 255, 0.09)),
+          rgba(255, 255, 255, 0.1);
+      }
+
+      .video-thumb {
+        position: relative;
+        display: block;
+        width: 100%;
+        border: 0;
+        aspect-ratio: 16 / 9;
+        background: #000;
+        color: inherit;
+        cursor: pointer;
+        overflow: hidden;
+        padding: 0;
+      }
+
+      .video-thumb img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease, filter 0.4s ease;
+      }
+
+      .video-card:hover .video-thumb img {
+        filter: saturate(1.08) contrast(1.05);
+        transform: scale(1.04);
+      }
+
+      .play-chip {
+        position: absolute;
+        left: 16px;
+        bottom: 16px;
+        display: inline-grid;
+        place-items: center;
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--gold), var(--gold-2));
+        color: var(--ink);
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+        font-size: 1.25rem;
+        font-weight: 950;
+      }
+
+      .video-content {
+        display: grid;
+        gap: 12px;
+        padding: 18px;
+      }
+
+      .video-content h3 {
+        margin: 0;
+        color: var(--white);
+        font-size: 1.15rem;
+        line-height: 1.2;
+      }
+
+      .video-content span {
+        color: var(--gold-2);
+        font-size: 0.78rem;
+        font-weight: 950;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .video-play-button {
+        justify-self: start;
+      }
+
+      .video-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        display: none;
+        place-items: center;
+        background: rgba(2, 7, 20, 0.78);
+        padding: 18px;
+      }
+
+      .video-modal.open {
+        display: grid;
+      }
+
+      .video-modal-card {
+        width: min(980px, 100%);
+        border: 1px solid rgba(247, 217, 128, 0.34);
+        border-radius: 30px;
+        background: rgba(7, 26, 61, 0.92);
+        box-shadow: var(--shadow);
+        padding: 14px;
+      }
+
+      .video-modal-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 8px 8px 14px;
+      }
+
+      .video-modal-top strong {
+        color: var(--gold-2);
+      }
+
+      .video-close {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--white);
+        cursor: pointer;
+        font-size: 1.25rem;
+        font-weight: 950;
+      }
+
+      .video-modal iframe {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border: 0;
+        border-radius: 22px;
+        background: #000;
+      }
+
+      .video-fallback {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 8px 4px;
+      }
+
+      .video-fallback span {
+        color: var(--muted);
+        font-size: 0.92rem;
+        font-weight: 800;
+      }
+
+      .video-fallback a {
+        color: var(--gold-2);
+        font-weight: 950;
+      }
+
+      .testimonial-shell {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: center;
+      }
+
+      .testimonial-card {
+        min-height: 260px;
+        border-radius: 32px;
+        padding: 30px;
+      }
+
+      .testimonial-card .stars {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 18px;
+        color: var(--gold-2);
+        font-size: 1.25rem;
+        letter-spacing: 0.08em;
+      }
+
+      .testimonial-card p {
+        color: var(--white);
+        font-size: clamp(1.18rem, 2vw, 1.55rem);
+        font-weight: 850;
+        line-height: 1.45;
+      }
+
+      .testimonial-card strong {
+        display: block;
+        margin-top: 18px;
+        color: var(--gold-2);
+      }
+
+      .testimonial-card span {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .slider-button {
+        display: grid;
+        place-items: center;
+        width: 48px;
+        height: 48px;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--gold-2);
+        cursor: pointer;
+        font-size: 1.6rem;
+        font-weight: 950;
+        transition: transform 0.25s ease, background 0.25s ease;
+      }
+
+      .slider-button:hover {
+        transform: translateY(-2px);
+        background: rgba(247, 217, 128, 0.16);
+      }
+
+      .result-board {
+        display: grid;
+        grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr);
+        gap: 18px;
+        align-items: stretch;
+      }
+
+      .results-intro {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 0.36fr);
+        gap: 24px;
+        align-items: end;
+        margin-bottom: 30px;
+      }
+
+      .results-intro .section-heading {
+        margin-bottom: 0;
+      }
+
+      .results-note {
+        border: 1px solid rgba(247, 217, 128, 0.28);
+        border-radius: 26px;
+        background:
+          radial-gradient(circle at 100% 0%, rgba(247, 217, 128, 0.22), transparent 9rem),
+          rgba(255, 255, 255, 0.08);
+        box-shadow: 0 20px 70px rgba(0, 0, 0, 0.18);
+        padding: 22px;
+      }
+
+      .results-note strong {
+        display: block;
+        color: var(--gold-2);
+        font-size: 1.55rem;
+        line-height: 1;
+      }
+
+      .results-note p {
+        margin: 10px 0 18px;
+        font-size: 0.95rem;
+      }
+
+      .result-table {
+        display: grid;
+        border-radius: 28px;
+        overflow: hidden;
+      }
+
+      .result-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 16px;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 18px;
+        transition: background 0.25s ease, transform 0.25s ease;
+      }
+
+      .result-row:hover {
+        background: rgba(247, 217, 128, 0.12);
+        transform: translateX(4px);
+      }
+
+      .result-row:last-child {
+        border-bottom: 0;
+      }
+
+      .result-row strong {
+        color: var(--gold-2);
+      }
+
+      .founder-card {
+        border-radius: 34px;
+        padding: 34px;
+      }
+
+      .quote {
+        margin: 0;
+        border-radius: 34px;
+        background: linear-gradient(135deg, var(--gold), var(--gold-2));
+        color: var(--ink);
+        padding: 34px;
+        font-size: clamp(1.55rem, 4vw, 2.75rem);
+        font-weight: 950;
+        line-height: 1.1;
+      }
+
+      .faq-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.75fr) minmax(0, 1fr);
+        gap: 30px;
+        align-items: start;
+      }
+
+      .faq-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .faq details {
+        border-radius: 20px;
+        padding: 18px;
+      }
+
+      .faq summary {
+        cursor: pointer;
+        color: var(--gold-2);
+        font-weight: 950;
+      }
+
+      .faq details p {
+        margin: 12px 0 0;
+      }
+
+      .study-plan {
+        display: grid;
+        grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+        gap: 32px;
+        align-items: stretch;
+      }
+
+      .study-form {
+        display: grid;
+        gap: 14px;
+        border-radius: 30px;
+        padding: 24px;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      label {
+        display: grid;
+        gap: 8px;
+        color: var(--gold-2);
+        font-weight: 900;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        min-height: 50px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.94);
+        color: var(--ink);
+        padding: 13px 14px;
+        outline: none;
+      }
+
+      textarea {
+        min-height: 92px;
+        resize: vertical;
+      }
+
+      .form-message {
+        display: none;
+        border-radius: 16px;
+        background: rgba(247, 217, 128, 0.14);
+        color: var(--gold-2);
+        padding: 14px;
+        font-weight: 850;
+      }
+
+      .site-footer {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+        border-top: 1px solid var(--line);
+        padding: 54px 0 72px;
+      }
+
+      .footer-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+        gap: 28px;
+      }
+
+      .branches {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .branches span,
+      .contact-pill {
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 15px;
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      .contact-pill {
+        display: inline-flex;
+        margin-top: 14px;
+        color: var(--gold-2);
+      }
+
+      .whatsapp-float {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 30;
+        box-shadow: var(--shadow);
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(28px);
+        transition: opacity 0.7s ease, transform 0.7s ease;
+      }
+
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+
+        50% {
+          transform: translateY(-12px);
+        }
+      }
+
+      @media (max-width: 980px) {
+        .header-inner {
+          align-items: flex-start;
+          flex-wrap: wrap;
+        }
+
+        nav {
+          order: 3;
+          width: 100%;
+          flex-wrap: wrap;
+        }
+
+        .hero,
+        .split,
+        .system-tabs,
+        .video-head,
+        .result-board,
+        .results-intro,
+        .faq-grid,
+        .study-plan,
+        .footer-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          min-height: auto;
+          padding-top: 64px;
+        }
+
+        .hero-visual {
+          min-height: 520px;
+        }
+
+        .hero-photo-card {
+          position: relative;
+          inset: auto;
+          margin-left: auto;
+          margin-right: auto;
+          transform: none;
+        }
+
+        .floating-note {
+          left: 16px;
+          bottom: 8px;
+        }
+
+        .metrics,
+        .result-metrics,
+        .system-grid,
+        .life-grid,
+        .timeline,
+        .branches {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 620px) {
+        .top-strip {
+          font-size: 0.8rem;
+        }
+
+        .site-header {
+          width: min(100% - 18px, 1180px);
+          border-radius: 18px;
+        }
+
+        nav {
+          display: none;
+        }
+
+        nav.open {
+          display: flex;
+        }
+
+        .menu-button {
+          display: inline-flex;
+        }
+
+        h1 {
+          font-size: 3.25rem;
+        }
+
+        h2 {
+          font-size: 2.45rem;
+        }
+
+        .hero,
+        .section {
+          width: min(100% - 24px, 1180px);
+        }
+
+        .trust-bar,
+        .problem-grid,
+        .metrics,
+        .result-metrics,
+        .system-grid,
+        .life-grid,
+        .timeline,
+        .video-grid,
+        .testimonial-shell,
+        .form-row,
+        .branches,
+        .result-row {
+          grid-template-columns: 1fr;
+        }
+
+        .slider-button {
+          width: 100%;
+          border-radius: 16px;
+        }
+
+        .hero-visual {
+          min-height: auto;
+        }
+
+        .hero-photo-card {
+          min-height: auto;
+          width: 100%;
+        }
+
+        .campus-photo {
+          min-height: auto;
+        }
+
+        .campus-photo img {
+          height: auto;
+          max-height: none;
+        }
+
+        .floating-note {
+          position: relative;
+          left: auto;
+          bottom: auto;
+          max-width: 100%;
+          margin-top: 16px;
+        }
+
+        .section {
+          padding: 70px 0;
+        }
+
+        .whatsapp-float {
+          left: 14px;
+          right: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top-strip">Admissions and academic counselling open for Classes 8-12, JEE, NEET and NDA</div>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="#top" aria-label="Genesis Educates home">
+          <img class="brand-logo" src="assets/genesis_logo.jpeg" alt="Genesis Educates logo" />
+          <span>
+            <strong>Genesis</strong>
+            <small>Educates</small>
+          </span>
+        </a>
+        <button class="menu-button" type="button" id="menuButton">Menu</button>
+        <nav id="mainNav" aria-label="Primary navigation">
+          <a href="#system">System</a>
+          <a href="#seminar">Seminars</a>
+          <a href="results.html">Results</a>
+          <a href="#faq">FAQ</a>
+          <a href="#contact">Contact</a>
+        </nav>
+        <a class="button primary" href="tel:9041056405">Call Now</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="top">
+        <div class="hero-copy reveal">
+          <p class="eyebrow">Tri-City's most trusted academic institution since 2009</p>
+          <h1>Where Every Child Is <span>Visible</span></h1>
+          <p>
+            A structured academic ecosystem for Classes 8-12, Boards, JEE, NEET
+            and NDA - built around focus, discipline, measurable progress and
+            parent partnership.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#study-plan">Get a Study Plan</a>
+            <a class="button secondary" href="#system">Explore System</a>
+          </div>
+          <div class="trust-bar">
+            <span>Phones at entry</span>
+            <span>Weekly testing</span>
+            <span>Parent updates</span>
+          </div>
+        </div>
+
+        <div class="hero-visual reveal" aria-label="Genesis progress dashboard">
+          <div class="hero-photo-card">
+            <div class="phone-top">
+              <span>Genesis Dashboard</span>
+              <span>Live Progress</span>
+            </div>
+            <div class="score-orbit">
+              <div>
+                <strong class="counter" data-target="85">0</strong>
+                <span>% Improvement</span>
+              </div>
+            </div>
+            <div class="dashboard-list">
+              <div><span>Written Test Discipline</span><b>Weekly</b></div>
+              <div><span>Oral Viva Readiness</span><b>Active</b></div>
+              <div><span>Parent Communication</span><b>Aligned</b></div>
+              <div><span>Academic Confidence</span><b>Growing</b></div>
+            </div>
+          </div>
+          <div class="floating-note">
+            <strong>Saturday Parent Hour</strong>
+            <p>Every Saturday, 2:30-3:30 PM. No appointment needed.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section split" id="system">
+        <div class="reveal">
+          <p class="eyebrow">Building focus in a distracted generation</p>
+          <h2>The modern Goliath does not roar. <span>It scrolls.</span></h2>
+          <p>
+            Genesis is designed for students who need structure, not shortcuts.
+            We build academic strength through routine, accountability, testing,
+            oral expression, parent alignment and mentor-led clarity.
+          </p>
+        </div>
+        <div class="problem-grid">
+          <article class="problem-card reveal"><span class="icon-badge">01</span><h3>Screen Addiction</h3><p>Your child starts for 5 minutes and an hour disappears.</p></article>
+          <article class="problem-card reveal"><span class="icon-badge">02</span><h3>Shrinking Focus</h3><p>Reading without checking notifications is becoming harder.</p></article>
+          <article class="problem-card reveal"><span class="icon-badge">03</span><h3>YouTube Dependency</h3><p>Someone else solves, so the child stops thinking deeply.</p></article>
+          <article class="problem-card reveal"><span class="icon-badge">04</span><h3>AI Shortcut</h3><p>Fast answers can replace real understanding if structure is missing.</p></article>
+        </div>
+      </section>
+
+      <section class="section metrics">
+        <article class="metric-card reveal"><strong class="counter" data-target="16">0</strong><span>Years of mentoring</span></article>
+        <article class="metric-card reveal"><strong class="counter" data-target="12000">0</strong><span>Students and families mentored</span></article>
+        <article class="metric-card reveal"><strong class="counter" data-target="90">0</strong><span>%+ parent satisfaction</span></article>
+        <article class="metric-card reveal"><strong class="counter" data-target="100">0</strong><span>School workshops</span></article>
+      </section>
+
+      <section class="section wide-band">
+        <div class="section-heading reveal">
+          <p class="eyebrow">The Genesis Method</p>
+          <h2>Champions are built through <span>structure.</span></h2>
+        </div>
+        <div class="system-tabs reveal">
+          <div class="tab-list" role="tablist" aria-label="Genesis system tabs">
+            <button class="tab-button active" type="button" data-tab="focus">Focus System</button>
+            <button class="tab-button" type="button" data-tab="testing">Testing System</button>
+            <button class="tab-button" type="button" data-tab="parents">Parent Partnership</button>
+          </div>
+          <article class="glass-card tab-panel" id="tabPanel">
+            <h3>Phones at entry. Minds in class.</h3>
+            <p>
+              Genesis removes the biggest distraction first, then builds deep
+              study habits through self-study staybacks, oral vivas and guided
+              revision.
+            </p>
+          </article>
+        </div>
+        <div class="system-grid">
+          <article class="system-card reveal"><span>P</span><strong>Phones at Entry</strong></article>
+          <article class="system-card reveal"><span>W</span><strong>Weekly Written Tests</strong></article>
+          <article class="system-card reveal"><span>O</span><strong>Oral Vivas</strong></article>
+          <article class="system-card reveal"><span>S</span><strong>Syllabus by October</strong></article>
+          <article class="system-card reveal"><span>M</span><strong>Mindset Workshops</strong></article>
+          <article class="system-card reveal"><span>P</span><strong>Parent Workshops</strong></article>
+          <article class="system-card reveal"><span>S</span><strong>Self-Study Staybacks</strong></article>
+          <article class="system-card reveal"><span>U</span><strong>Weekly Updates</strong></article>
+        </div>
+      </section>
+
+      <section class="section" id="seminar">
+        <div class="section-heading reveal">
+          <p class="eyebrow">The Student Seminar System</p>
+          <h2>Learning becomes powerful when a student <span>teaches.</span></h2>
+          <p>
+            Every Genesis student participates in structured academic seminar
+            sessions 3-4 times a year. This is academic leadership training,
+            not just public speaking.
+          </p>
+        </div>
+        <div class="timeline">
+          <article class="reveal">
+            <span class="seminar-icon">T</span>
+            <div class="seminar-detail">
+              <strong>Topic Assigned</strong>
+              <p>Students receive a focused academic topic with clear preparation expectations and mentor direction.</p>
+              <span class="seminar-chip">Clarity begins</span>
+            </div>
+          </article>
+          <article class="reveal">
+            <span class="seminar-icon">R</span>
+            <div class="seminar-detail">
+              <strong>Deep Preparation</strong>
+              <p>They research, revise, understand and prepare the concept in their own words before presenting.</p>
+              <span class="seminar-chip">Concept depth</span>
+            </div>
+          </article>
+          <article class="reveal">
+            <span class="seminar-icon">B</span>
+            <div class="seminar-detail">
+              <strong>Board Presentation</strong>
+              <p>Students explain concepts in front of mentors and classmates, building confidence and communication.</p>
+              <span class="seminar-chip">Stage confidence</span>
+            </div>
+          </article>
+          <article class="reveal">
+            <span class="seminar-icon">P</span>
+            <div class="seminar-detail">
+              <strong>Shared With Parents</strong>
+              <p>Recordings are shared so parents can see academic growth, expression and confidence clearly.</p>
+              <span class="seminar-chip">Visible progress</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section split">
+        <div class="reveal">
+          <p class="eyebrow">Life at Genesis</p>
+          <h2>Students do not just study. <span>They belong.</span></h2>
+          <p>
+            We notice how each student learns, what distracts them and what
+            motivates them. Then mentors build a personalized strategy with
+            the student and parents.
+          </p>
+        </div>
+        <figure class="campus-photo reveal">
+          <img
+            src="assets/Hero_genesis.jpeg"
+            alt="Genesis Educates learning environment"
+          />
+          <figcaption class="campus-caption">
+            <span>Genesis Learning Culture</span>
+            <strong>A serious, caring space where students are noticed.</strong>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="section life-grid">
+        <article class="life-card reveal"><span>01</span>Small Batches</article>
+        <article class="life-card reveal"><span>02</span>Multi-Layer Tests</article>
+        <article class="life-card reveal"><span>03</span>Weakness Tracking</article>
+        <article class="life-card reveal"><span>04</span>Board Writing Practice</article>
+        <article class="life-card reveal"><span>05</span>Saturday PTM</article>
+        <article class="life-card reveal"><span>06</span>Accessible Mentors</article>
+        <article class="life-card reveal"><span>07</span>Safe Transport</article>
+        <article class="life-card reveal"><span>08</span>Career Clarity</article>
+      </section>
+
+      <section class="section wide-band" id="results">
+        <div class="results-intro reveal">
+          <div class="section-heading">
+            <p class="eyebrow">Results that command respect</p>
+            <h2>Since 2009, Genesis has delivered <span>consistent outcomes.</span></h2>
+            <p>
+              Small batches, structured mentoring and visible progress have helped
+              students earn strong board scores, engineering selections, medical
+              success and major academic comebacks.
+            </p>
+          </div>
+          <aside class="results-note">
+            <strong>100+ selections</strong>
+            <p>Explore real student journeys from the Champions 2021-25 collection.</p>
+            <a class="button primary" href="results.html">View Champions</a>
+          </aside>
+        </div>
+        <div class="result-board">
+          <div class="metrics result-metrics">
+            <article class="metric-card reveal"><strong>&gt;80</strong><span>IIT / NIT / BITS / top engineering selections</span></article>
+            <article class="metric-card reveal"><strong>&gt;65</strong><span>NEET / GMCH / medical selections</span></article>
+            <article class="metric-card reveal"><strong>&gt;160</strong><span>Board exam champions above 90%</span></article>
+            <article class="metric-card reveal"><strong>&gt;250</strong><span>Students showing 15%+ improvement</span></article>
+          </div>
+          <div class="glass-card result-table reveal">
+            <div class="result-row"><span>IIT / NIT / BITS / Top Engineering Selections</span><strong>&gt; 80 Students</strong></div>
+            <div class="result-row"><span>NEET / GMCH / Medical Selections</span><strong>&gt; 65 Students</strong></div>
+            <div class="result-row"><span>Board Exam Champions, 90% and above</span><strong>&gt; 160 Students</strong></div>
+            <div class="result-row"><span>Students Showing 15%+ Score Improvement</span><strong>&gt; 250 Students</strong></div>
+            <div class="result-row"><span>School Toppers Produced</span><strong>21-24 Students</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section split">
+        <article class="glass-card founder-card reveal">
+          <p class="eyebrow">A note from our founder</p>
+          <h2>Built around a system, not one person.</h2>
+          <p>
+            In 2009, Sahil Khanna started Genesis with 3 students in a single
+            room. The promise was simple: treat every child as special and help
+            them improve without comparison.
+          </p>
+        </article>
+        <blockquote class="quote reveal">
+          "We do not accelerate children. We strengthen them. We do not pressure
+          children into performance. We prepare them for it."
+        </blockquote>
+      </section>
+
+      <section class="section video-section" id="videos">
+        <div class="video-head reveal">
+          <div>
+            <p class="eyebrow">Genesis on YouTube</p>
+            <h2>See the Genesis learning culture in action.</h2>
+            <p>
+              Watch selected Genesis videos from student learning moments,
+              academic culture, results and parent-facing updates.
+            </p>
+          </div>
+          <a
+            class="button secondary"
+            href="https://youtube.com/playlist?list=PLOmJKqxsOuS2TO5pLYuyFwH1TR3N6Qsvk&si=ZtrAg9-uLjcMhTlj"
+            target="_blank"
+            rel="noopener noreferrer"
+          >Open Full Playlist</a>
+        </div>
+        <div class="video-grid reveal">
+          <article class="video-card">
+            <button class="video-thumb js-video" type="button" data-video="7z-uedws3y8" data-title="Student learning and Genesis academic culture" aria-label="Play Genesis video 1 on this page">
+              <img src="https://img.youtube.com/vi/7z-uedws3y8/hqdefault.jpg" alt="Genesis Educates YouTube video thumbnail" loading="lazy" />
+              <span class="play-chip">▶</span>
+            </button>
+            <div class="video-content">
+              <span>Genesis Video</span>
+              <h3>Student learning and Genesis academic culture</h3>
+              <button class="button secondary video-play-button js-video" type="button" data-video="7z-uedws3y8" data-title="Student learning and Genesis academic culture">Watch Video</button>
+            </div>
+          </article>
+          <article class="video-card">
+            <button class="video-thumb js-video" type="button" data-video="gip53_XKdDo" data-title="Focused mentoring and visible student progress" aria-label="Play Genesis video 2 on this page">
+              <img src="https://img.youtube.com/vi/gip53_XKdDo/hqdefault.jpg" alt="Genesis Educates YouTube video thumbnail" loading="lazy" />
+              <span class="play-chip">▶</span>
+            </button>
+            <div class="video-content">
+              <span>Genesis Video</span>
+              <h3>Focused mentoring and visible student progress</h3>
+              <button class="button secondary video-play-button js-video" type="button" data-video="gip53_XKdDo" data-title="Focused mentoring and visible student progress">Watch Video</button>
+            </div>
+          </article>
+          <article class="video-card">
+            <button class="video-thumb js-video" type="button" data-video="9OMLiaO72UY" data-title="Inside the Genesis system for disciplined learning" aria-label="Play Genesis video 3 on this page">
+              <img src="https://img.youtube.com/vi/9OMLiaO72UY/hqdefault.jpg" alt="Genesis Educates YouTube video thumbnail" loading="lazy" />
+              <span class="play-chip">▶</span>
+            </button>
+            <div class="video-content">
+              <span>Genesis Video</span>
+              <h3>Inside the Genesis system for disciplined learning</h3>
+              <button class="button secondary video-play-button js-video" type="button" data-video="9OMLiaO72UY" data-title="Inside the Genesis system for disciplined learning">Watch Video</button>
+            </div>
+          </article>
+          <article class="video-card">
+            <button class="video-thumb js-video" type="button" data-video="aC9ilMAbiWw" data-title="Genesis classroom moments and academic confidence" aria-label="Play Genesis video 4 on this page">
+              <img src="https://img.youtube.com/vi/aC9ilMAbiWw/hqdefault.jpg" alt="Genesis Educates YouTube video thumbnail" loading="lazy" />
+              <span class="play-chip">▶</span>
+            </button>
+            <div class="video-content">
+              <span>Genesis Video</span>
+              <h3>Genesis classroom moments and academic confidence</h3>
+              <button class="button secondary video-play-button js-video" type="button" data-video="aC9ilMAbiWw" data-title="Genesis classroom moments and academic confidence">Watch Video</button>
+            </div>
+          </article>
+          <article class="video-card">
+            <button class="video-thumb js-video" type="button" data-video="SrRmpo5NRbI" data-title="Results, preparation and the small-batch advantage" aria-label="Play Genesis video 5 on this page">
+              <img src="https://img.youtube.com/vi/SrRmpo5NRbI/hqdefault.jpg" alt="Genesis Educates YouTube video thumbnail" loading="lazy" />
+              <span class="play-chip">▶</span>
+            </button>
+            <div class="video-content">
+              <span>Genesis Video</span>
+              <h3>Results, preparation and the small-batch advantage</h3>
+              <button class="button secondary video-play-button js-video" type="button" data-video="SrRmpo5NRbI" data-title="Results, preparation and the small-batch advantage">Watch Video</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section wide-band" id="testimonials">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Testimonials</p>
+          <h2>Parents notice the difference when progress becomes visible.</h2>
+        </div>
+        <div class="testimonial-shell reveal">
+          <button class="slider-button" type="button" id="prevReview" aria-label="Previous testimonial">‹</button>
+          <article class="glass-card testimonial-card" id="testimonialCard">
+            <div class="stars">★★★★★</div>
+            <p>"Genesis helped my child become more disciplined and confident. The weekly tests and regular updates made progress very clear for us."</p>
+            <strong>Parent of Class 10 student</strong>
+            <span>Board exam preparation</span>
+          </article>
+          <button class="slider-button" type="button" id="nextReview" aria-label="Next testimonial">›</button>
+        </div>
+      </section>
+
+      <section class="section faq" id="faq">
+        <div class="faq-grid">
+          <div class="reveal">
+            <p class="eyebrow">Parent Questions</p>
+            <h2>Before you visit Genesis.</h2>
+            <p>Quick answers for parents who want a structured, serious and caring academic environment.</p>
+          </div>
+          <div class="faq-list reveal">
+            <details open>
+              <summary>Which classes does Genesis support?</summary>
+              <p>Genesis supports Classes 8-12 for CBSE and ICSE, along with focused preparation for Boards, JEE, NEET and NDA.</p>
+            </details>
+            <details>
+              <summary>How do parents stay updated?</summary>
+              <p>Parents receive regular academic updates, test feedback and can meet the Academic Head during Saturday Parent Hour.</p>
+            </details>
+            <details>
+              <summary>What makes the Genesis system different?</summary>
+              <p>The system combines phones-at-entry discipline, weekly tests, oral vivas, syllabus completion targets, mindset workshops and parent alignment.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="section study-plan" id="study-plan">
+        <div class="reveal">
+          <p class="eyebrow">Our plan for your child</p>
+          <h2>Start with <span>clarity.</span></h2>
+          <p>
+            Share your child's class, goal and concern. The form prepares a
+            WhatsApp inquiry so the Genesis team can guide the next step.
+          </p>
+        </div>
+        <form class="study-form reveal" id="studyForm">
+          <div class="form-row">
+            <label>
+              Student Name
+              <input type="text" id="studentName" placeholder="Enter student name" required />
+            </label>
+            <label>
+              Parent Phone
+              <input type="tel" id="parentPhone" placeholder="+91" required />
+            </label>
+          </div>
+          <div class="form-row">
+            <label>
+              Class
+              <select id="studentClass" required>
+                <option>Class 8</option>
+                <option>Class 9</option>
+                <option>Class 10</option>
+                <option>Class 11</option>
+                <option>Class 12</option>
+              </select>
+            </label>
+            <label>
+              Primary Goal
+              <select id="studentGoal" required>
+                <option>Board / School Exam Excellence</option>
+                <option>JEE Preparation</option>
+                <option>NEET Preparation</option>
+                <option>NDA Preparation</option>
+                <option>Career Clarity</option>
+              </select>
+            </label>
+          </div>
+          <label>
+            Main Concern
+            <textarea id="studentConcern" placeholder="Example: focus, marks, confidence, career confusion"></textarea>
+          </label>
+          <button class="button primary" type="submit">Discuss Study Plan on WhatsApp</button>
+          <div class="form-message" id="formMessage">Opening WhatsApp with your inquiry.</div>
+        </form>
+      </section>
+
+      <footer class="site-footer" id="contact">
+        <div class="footer-grid">
+          <div>
+            <p class="eyebrow">Genesis Educates</p>
+            <h2>Building clarity. Building confidence. Building champions.</h2>
+            <a class="contact-pill" href="tel:9041056405">9041056405 | 7696016405</a>
+          </div>
+          <div class="branches">
+            <span>SCO-13, Sector 15, Panchkula</span>
+            <span>SCO-293, 294, Sector 20, Panchkula</span>
+            <span>SCO-17, Near Dominos, VIP Road, Zirakpur</span>
+          </div>
+        </div>
+      </footer>
+    </main>
+
+    <div class="video-modal" id="videoModal" aria-hidden="true">
+      <div class="video-modal-card">
+        <div class="video-modal-top">
+          <strong id="videoModalTitle">Genesis Video</strong>
+          <button class="video-close" type="button" id="closeVideoModal" aria-label="Close video">x</button>
+        </div>
+        <iframe
+          id="videoPlayer"
+          title="Genesis Educates video player"
+          src=""
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+        ></iframe>
+        <div class="video-fallback">
+          <span>If the video does not load here, YouTube may be blocking embedded playback for this browser.</span>
+          <a id="videoFallbackLink" href="https://www.youtube.com/playlist?list=PLOmJKqxsOuS2TO5pLYuyFwH1TR3N6Qsvk" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
+        </div>
+      </div>
+    </div>
+
+    <a class="button primary whatsapp-float" href="https://wa.me/919041056405?text=Hello%20Genesis%20Educates%2C%20I%20want%20to%20discuss%20a%20study%20plan." target="_blank" rel="noopener noreferrer">WhatsApp Inquiry</a>
+
+    <script>
+      const nav = document.getElementById("mainNav");
+      document.getElementById("menuButton").addEventListener("click", () => {
+        nav.classList.toggle("open");
+      });
+
+      const tabContent = {
+        focus: {
+          title: "Phones at entry. Minds in class.",
+          text: "Genesis removes the biggest distraction first, then builds deep study habits through self-study staybacks, oral vivas and guided revision.",
+        },
+        testing: {
+          title: "Weekly tests make progress visible.",
+          text: "Students write regularly, mentors track weak areas and parents understand exactly where improvement is happening.",
+        },
+        parents: {
+          title: "Parent, student and mentor move together.",
+          text: "Saturday Parent Hour, regular updates and parent workshops keep every important decision aligned.",
+        },
+      };
+
+      const tabPanel = document.getElementById("tabPanel");
+      document.querySelectorAll(".tab-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".tab-button").forEach((item) => item.classList.remove("active"));
+          button.classList.add("active");
+          const current = tabContent[button.dataset.tab];
+          tabPanel.innerHTML = `<h3>${current.title}</h3><p>${current.text}</p>`;
+        });
+      });
+
+      const revealObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.16 }
+      );
+
+      document.querySelectorAll(".reveal").forEach((item) => revealObserver.observe(item));
+
+      const animateCounter = (element) => {
+        const target = Number(element.dataset.target);
+        const duration = 1200;
+        const start = performance.now();
+        const step = (now) => {
+          const progress = Math.min((now - start) / duration, 1);
+          const value = Math.floor(progress * target);
+          element.textContent = target >= 1000 ? value.toLocaleString("en-IN") + "+" : value;
+          if (progress < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      };
+
+      const counterObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              animateCounter(entry.target);
+              counterObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.5 }
+      );
+
+      document.querySelectorAll(".counter").forEach((counter) => counterObserver.observe(counter));
+
+      const testimonials = [
+        {
+          quote:
+            "Genesis helped my child become more disciplined and confident. The weekly tests and regular updates made progress very clear for us.",
+          name: "Parent of Class 10 student",
+          detail: "Board exam preparation",
+        },
+        {
+          quote:
+            "The best part is that the team notices every child personally. My child became more regular, focused and serious about studies.",
+          name: "Parent of Class 9 student",
+          detail: "Academic discipline and focus",
+        },
+        {
+          quote:
+            "The student seminar system improved confidence beautifully. We could actually see our child explain concepts with clarity.",
+          name: "Parent of senior student",
+          detail: "Seminar and communication growth",
+        },
+      ];
+
+      let testimonialIndex = 0;
+      const testimonialCard = document.getElementById("testimonialCard");
+
+      const renderTestimonial = () => {
+        const current = testimonials[testimonialIndex];
+        testimonialCard.innerHTML = `
+          <div class="stars">★★★★★</div>
+          <p>"${current.quote}"</p>
+          <strong>${current.name}</strong>
+          <span>${current.detail}</span>
+        `;
+      };
+
+      document.getElementById("prevReview").addEventListener("click", () => {
+        testimonialIndex = (testimonialIndex - 1 + testimonials.length) % testimonials.length;
+        renderTestimonial();
+      });
+
+      document.getElementById("nextReview").addEventListener("click", () => {
+        testimonialIndex = (testimonialIndex + 1) % testimonials.length;
+        renderTestimonial();
+      });
+
+      const videoModal = document.getElementById("videoModal");
+      const videoPlayer = document.getElementById("videoPlayer");
+      const videoModalTitle = document.getElementById("videoModalTitle");
+      const videoFallbackLink = document.getElementById("videoFallbackLink");
+
+      const openVideo = (videoId, title) => {
+        const origin =
+          window.location.origin && window.location.origin !== "null"
+            ? `&origin=${encodeURIComponent(window.location.origin)}`
+            : "";
+        videoModalTitle.textContent = title || "Genesis Video";
+        videoFallbackLink.href = `https://www.youtube.com/watch?v=${videoId}`;
+        videoPlayer.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&playsinline=1&modestbranding=1${origin}`;
+        videoModal.classList.add("open");
+        videoModal.setAttribute("aria-hidden", "false");
+      };
+
+      const closeVideo = () => {
+        videoModal.classList.remove("open");
+        videoModal.setAttribute("aria-hidden", "true");
+        videoPlayer.src = "";
+      };
+
+      document.querySelectorAll(".js-video").forEach((button) => {
+        button.addEventListener("click", () => {
+          openVideo(button.dataset.video, button.dataset.title);
+        });
+      });
+
+      document.getElementById("closeVideoModal").addEventListener("click", closeVideo);
+      videoModal.addEventListener("click", (event) => {
+        if (event.target === videoModal) closeVideo();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeVideo();
+      });
+
+      document.getElementById("studyForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const name = document.getElementById("studentName").value.trim();
+        const phone = document.getElementById("parentPhone").value.trim();
+        const className = document.getElementById("studentClass").value;
+        const goal = document.getElementById("studentGoal").value;
+        const concern = document.getElementById("studentConcern").value.trim() || "Need academic guidance";
+        const message = `Hello Genesis Educates, I want to discuss a study plan.%0AStudent: ${encodeURIComponent(name)}%0AParent phone: ${encodeURIComponent(phone)}%0AClass: ${encodeURIComponent(className)}%0AGoal: ${encodeURIComponent(goal)}%0AConcern: ${encodeURIComponent(concern)}`;
+
+        document.getElementById("formMessage").style.display = "block";
+        window.open(`https://wa.me/919041056405?text=${message}`, "_blank", "noopener,noreferrer");
+      });
+    </script>
+  </body>
+</html>
