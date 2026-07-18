@@ -1449,9 +1449,6 @@
         }
 
         .trust-bar,
-        .problem-grid,
-        .metrics,
-        .result-metrics,
         .timeline,
         .video-grid,
         .testimonial-shell,
@@ -1461,6 +1458,9 @@
           grid-template-columns: 1fr;
         }
 
+        .problem-grid,
+        .metrics,
+        .result-metrics,
         .system-grid,
         .life-grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1468,6 +1468,8 @@
           margin-top: 16px;
         }
 
+        .problem-card,
+        .metric-card,
         .system-card,
         .life-card {
           min-height: 92px;
@@ -1476,6 +1478,7 @@
           font-size: 0.88rem;
         }
 
+        .icon-badge,
         .system-card span,
         .life-card span {
           width: 32px;
@@ -1483,6 +1486,38 @@
           margin-bottom: 9px;
           border-radius: 11px;
           font-size: 0.82rem;
+        }
+
+        .problem-card h3 {
+          margin-bottom: 6px;
+          font-size: 0.95rem;
+          line-height: 1.15;
+        }
+
+        .problem-card p {
+          margin-bottom: 0;
+          font-size: 0.78rem;
+          line-height: 1.35;
+        }
+
+        .problem-card::after {
+          right: -54px;
+          bottom: -58px;
+        }
+
+        .metric-card {
+          align-content: center;
+        }
+
+        .metric-card strong,
+        .result-metrics .metric-card strong {
+          font-size: 1.75rem;
+        }
+
+        .metric-card span {
+          margin-top: 7px;
+          font-size: 0.78rem;
+          line-height: 1.25;
         }
 
         .system-card strong {
