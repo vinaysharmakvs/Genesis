@@ -75,7 +75,49 @@
     { keys: ["founder", "sahil", "khanna", "started", "history", "since", "2009"], answer: answers.founder },
   ];
 
+  const faqData = Array.isArray(window.genesisFaqData) ? window.genesisFaqData : [];
   const normalize = (text) => text.toLowerCase().replace(/[^a-z0-9 ]/g, " ");
+  const escapeHtml = (value) =>
+    String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  const importantWords = (text) =>
+    normalize(text)
+      .split(/\s+/)
+      .filter((word) => word.length > 2 && !["the", "and", "for", "can", "you", "your", "child", "does", "what", "how", "why", "are", "with", "from", "this", "that"].includes(word));
+
+  const formatFaqAnswer = (item) =>
+    `<b>${escapeHtml(item.question)}</b><br>${escapeHtml(item.answer).replace(/\n/g, "<br>")}<br><br><small>${escapeHtml(item.category)}</small>`;
+
+  const findFaqAnswer = (query) => {
+    if (!faqData.length) return "";
+    const clean = normalize(query);
+    const exact = faqData.find((item) => normalize(item.question) === clean);
+    if (exact) return formatFaqAnswer(exact);
+
+    const words = importantWords(query);
+    if (!words.length) return "";
+
+    let best = { score: 0, item: null };
+    faqData.forEach((item) => {
+      const question = normalize(item.question);
+      const answer = normalize(item.answer);
+      const category = normalize(item.category);
+      const score = words.reduce((total, word) => {
+        if (question.includes(word)) return total + 5;
+        if (category.includes(word)) return total + 2;
+        if (answer.includes(word)) return total + 1;
+        return total;
+      }, 0);
+      if (score > best.score) best = { score, item };
+    });
+
+    return best.score >= 5 && best.item ? formatFaqAnswer(best.item) : "";
+  };
 
   const findResult = (query) => {
     const clean = normalize(query);
@@ -102,6 +144,9 @@
   const replyFor = (input) => {
     const q = normalize(input);
 
+    const faqAnswer = findFaqAnswer(input);
+    if (faqAnswer) return faqAnswer;
+
     if (q.includes("result") || q.includes("iit") || q.includes("neet") || q.includes("jee") || q.includes("bits") || q.includes("pec") || q.includes("champion")) {
       const matches = findResult(input);
       if (matches.length) {
@@ -113,7 +158,7 @@
     const mappedAnswer = findBestWebsiteAnswer(input);
     if (mappedAnswer) return mappedAnswer;
 
-    return "I searched the available Genesis website content but could not find an exact match. I can help with courses, Genesis system, seminars, results, branches, map, videos, counselling and contact details. Try typing: 'show IIT results', 'where is branch', 'fees counselling', or 'what is Genesis system'.";
+    return "I searched the Genesis FAQ and website content but could not find an exact match. I can help with admissions, fees, batches, homework, tests, parent updates, weak subjects, JEE, NEET, NDA, branches, app support and contact details. Try typing: 'fees instalments', 'missed class', 'weak in Maths', 'parent reports', or 'office timings'.";
   };
 
   const addMessage = (container, text, type) => {
@@ -146,10 +191,11 @@
         <div class="gene-chat-helper">Type any question. Gen-E will map it with website content.</div>
         <div class="gene-chat-quick">
           <button class="gene-chip" type="button">Courses</button>
+          <button class="gene-chip" type="button">Admissions</button>
+          <button class="gene-chip" type="button">Fees</button>
           <button class="gene-chip" type="button">Results</button>
           <button class="gene-chip" type="button">Branches</button>
-          <button class="gene-chip" type="button">Seminars</button>
-          <button class="gene-chip" type="button">Videos</button>
+          <button class="gene-chip" type="button">Parent updates</button>
           <button class="gene-chip" type="button">Contact</button>
         </div>
         <form class="gene-chat-form">
@@ -168,8 +214,8 @@
     launcher.addEventListener("click", () => {
       chat.classList.toggle("open");
       if (chat.classList.contains("open") && !messages.dataset.started) {
-        addMessage(messages, "Hi, I am <b>Gen-E</b>. Ask me about Genesis courses, branches, results, seminars, parent hour or counselling.", "bot");
-        addMessage(messages, "You can type naturally, for example: <b>show IIT results</b>, <b>where is Sector 20 branch</b>, or <b>what classes do you teach?</b>", "bot");
+        addMessage(messages, "Hi, I am <b>Gen-E</b>. Ask me about Genesis admissions, fees, batches, branches, student progress, parent updates, results or counselling.", "bot");
+        addMessage(messages, "You can type naturally, for example: <b>Can I pay fees in instalments?</b>, <b>What if my child misses a class?</b>, or <b>Where is Genesis located?</b>", "bot");
         messages.dataset.started = "true";
       }
     });
