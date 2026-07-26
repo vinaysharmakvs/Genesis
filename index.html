@@ -1158,14 +1158,134 @@
 
       .faq-grid {
         display: grid;
-        grid-template-columns: minmax(0, 0.75fr) minmax(0, 1fr);
-        gap: 30px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 22px;
         align-items: start;
       }
 
       .faq-list {
         display: grid;
         gap: 12px;
+        max-height: min(72vh, 760px);
+        overflow-y: auto;
+        padding-right: 8px;
+        scroll-padding-top: 12px;
+      }
+
+      .faq-list::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .faq-list::-webkit-scrollbar-track {
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .faq-list::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        background: linear-gradient(180deg, var(--gold), var(--gold-2));
+      }
+
+      .faq-toolbar {
+        display: grid;
+        gap: 14px;
+        margin-top: 22px;
+        max-width: 920px;
+      }
+
+      .faq-search {
+        width: 100%;
+        min-height: 52px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--white);
+        padding: 0 18px;
+        outline: 0;
+      }
+
+      .faq-search::placeholder {
+        color: rgba(255, 255, 255, 0.58);
+      }
+
+      .faq-search:focus {
+        border-color: rgba(247, 217, 128, 0.72);
+        box-shadow: 0 0 0 4px rgba(247, 217, 128, 0.13);
+      }
+
+      .faq-live-result {
+        display: none;
+        border: 1px solid rgba(247, 217, 128, 0.5);
+        border-radius: 22px;
+        background:
+          radial-gradient(circle at 12% 18%, rgba(247, 217, 128, 0.22), transparent 12rem),
+          rgba(255, 255, 255, 0.1);
+        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.18);
+        padding: 18px;
+      }
+
+      .faq-live-result.show {
+        display: block;
+      }
+
+      .faq-live-result span {
+        color: var(--gold-2);
+        font-size: 0.75rem;
+        font-weight: 950;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .faq-live-result strong {
+        display: block;
+        margin-top: 8px;
+        color: var(--white);
+        font-size: clamp(1.05rem, 2vw, 1.32rem);
+        line-height: 1.25;
+      }
+
+      .faq-live-result p {
+        margin: 10px 0 0;
+        color: rgba(255, 255, 255, 0.78);
+        line-height: 1.6;
+      }
+
+      .faq-category-tabs,
+      .faq-category-cards {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .faq-category-tabs button,
+      .faq-category-cards a {
+        min-height: 78px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background:
+          radial-gradient(circle at 12% 15%, rgba(247, 217, 128, 0.14), transparent 9rem),
+          rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.86);
+        padding: 15px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 950;
+        line-height: 1.22;
+        transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      }
+
+      .faq-category-tabs button.active,
+      .faq-category-cards a:hover {
+        border-color: rgba(247, 217, 128, 0.8);
+        background:
+          radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.38), transparent 6rem),
+          linear-gradient(135deg, rgba(216, 173, 73, 0.95), rgba(247, 217, 128, 0.94));
+        color: var(--ink);
+        transform: translateY(-2px);
+      }
+
+      .faq-view-all {
+        width: fit-content;
       }
 
       .faq details {
@@ -1181,6 +1301,14 @@
 
       .faq details p {
         margin: 12px 0 0;
+      }
+
+      .faq-empty {
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 18px;
+        color: rgba(255, 255, 255, 0.76);
+        background: rgba(255, 255, 255, 0.08);
       }
 
       .study-plan {
@@ -1274,6 +1402,26 @@
       .contact-pill {
         display: inline-flex;
         margin-top: 14px;
+        color: var(--gold-2);
+      }
+
+      .powered-by-tivoro {
+        margin-top: 28px;
+        border-top: 1px solid var(--line);
+        color: rgba(255, 255, 255, 0.64);
+        padding-top: 16px;
+        font-size: 0.84rem;
+        font-weight: 850;
+        text-align: center;
+      }
+
+      .powered-by-tivoro a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.25s ease;
+      }
+
+      .powered-by-tivoro a:hover {
         color: var(--gold-2);
       }
 
@@ -1590,7 +1738,7 @@
           <a href="#system">System</a>
           <a href="#seminar">Seminars</a>
           <a href="results.html">Results</a>
-          <a href="#faq">FAQ</a>
+          <a href="faq.html">FAQ</a>
           <a href="contact.html">Contact</a>
         </nav>
         <a class="button primary" href="tel:9041056405">Call Now</a>
@@ -1927,22 +2075,14 @@
         <div class="faq-grid">
           <div class="reveal">
             <p class="eyebrow">Parent Questions</p>
-            <h2>Before you visit Genesis.</h2>
-            <p>Quick answers for parents who want a structured, serious and caring academic environment.</p>
-          </div>
-          <div class="faq-list reveal">
-            <details open>
-              <summary>Which classes does Genesis support?</summary>
-              <p>Genesis supports Classes 8-12 for CBSE and ICSE, along with focused preparation for Boards, JEE, NEET and NDA.</p>
-            </details>
-            <details>
-              <summary>How do parents stay updated?</summary>
-              <p>Parents receive regular academic updates, test feedback and can meet the Academic Head during Saturday Parent Hour.</p>
-            </details>
-            <details>
-              <summary>What makes the Genesis system different?</summary>
-              <p>The system combines phones-at-entry discipline, weekly tests, oral vivas, syllabus completion targets, mindset workshops and parent alignment.</p>
-            </details>
+            <h2>Ask quickly. Explore the full FAQ separately.</h2>
+            <p>Search for an instant answer here, or open a focused FAQ page by category.</p>
+            <div class="faq-toolbar">
+              <input class="faq-search" type="search" placeholder="Search: fees, missed class, weak in Maths, PTM..." data-faq-search aria-label="Search Genesis FAQ" />
+              <div class="faq-live-result" data-faq-live-result aria-live="polite"></div>
+              <div class="faq-category-cards" data-faq-cards aria-label="FAQ categories"></div>
+              <a class="button secondary faq-view-all" href="faq.html">View Complete FAQ</a>
+            </div>
           </div>
         </div>
       </section>
@@ -2014,6 +2154,7 @@
             <span>SCO-17, Near Dominos, VIP Road, Zirakpur</span>
           </div>
         </div>
+        <div class="powered-by-tivoro"><a href="https://tivoro.in" target="_blank" rel="noopener noreferrer">Powered by Tivoro - Your digital growth partner</a></div>
       </footer>
     </main>
 
@@ -2040,6 +2181,7 @@
 
     <a class="button primary whatsapp-float" href="https://wa.me/919041056405?text=Hello%20Genesis%20Educates%2C%20I%20want%20to%20discuss%20a%20study%20plan." target="_blank" rel="noopener noreferrer">WhatsApp Inquiry</a>
 
+    <script src="faq-data.js"></script>
     <script src="chatbot.js"></script>
     <script>
       const nav = document.getElementById("mainNav");
@@ -2049,6 +2191,64 @@
         document.getElementById("menuButton").textContent = isOpen ? "Close" : "Menu";
         document.getElementById("menuButton").setAttribute("aria-expanded", String(isOpen));
       });
+
+      const faqItems = Array.isArray(window.genesisFaqData) ? window.genesisFaqData : [];
+      const faqSearch = document.querySelector("[data-faq-search]");
+      const faqCards = document.querySelector("[data-faq-cards]");
+      const faqLiveResult = document.querySelector("[data-faq-live-result]");
+      const escapeHtml = (value) =>
+        String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+
+      function renderFaqCards() {
+        if (!faqCards) return;
+        const categories = [...new Set(faqItems.map((item) => item.category))];
+        faqCards.innerHTML = categories
+          .map((category) => `<a href="faq.html?category=${encodeURIComponent(category)}">${escapeHtml(category)}</a>`)
+          .join("");
+      }
+
+      function renderInstantFaq() {
+        const query = (faqSearch?.value || "").trim().toLowerCase();
+        const queryWords = query.split(/\s+/).filter((word) => word.length > 1);
+        const filtered = faqItems.filter((item) => {
+          const haystack = `${item.question} ${item.answer} ${item.category}`.toLowerCase();
+          return queryWords.length && queryWords.every((word) => haystack.includes(word));
+        });
+
+        if (!faqLiveResult) return;
+        if (!queryWords.length) {
+          faqLiveResult.classList.remove("show");
+          faqLiveResult.innerHTML = "";
+          return;
+        }
+
+        if (!filtered.length) {
+          faqLiveResult.innerHTML = `
+            <span>Instant answer</span>
+            <strong>No exact match found</strong>
+            <p>Please call or WhatsApp Genesis at 9041056405, or open the complete FAQ page to browse all parent questions.</p>
+          `;
+          faqLiveResult.classList.add("show");
+          return;
+        }
+
+        const topMatch = filtered[0];
+        faqLiveResult.innerHTML = `
+          <span>Instant answer</span>
+          <strong>${escapeHtml(topMatch.question)}</strong>
+          <p>${escapeHtml(topMatch.answer).replace(/\n/g, "<br>")}</p>
+        `;
+        faqLiveResult.classList.add("show");
+      }
+
+      renderFaqCards();
+      renderInstantFaq();
+      faqSearch?.addEventListener("input", renderInstantFaq);
 
       const tabContent = {
         focus: {
