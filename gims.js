@@ -118,7 +118,7 @@
   const state = document.querySelector("[data-payment-state]");
   const payButton = document.querySelector("[data-pay-button]");
   const feeAmount = 14900;
-  const publicKeyPlaceholder = "RAZORPAY_KEY_ID_FROM_SERVER";
+  const publicKeyPlaceholder = "rzp_test_xe08dTmycCK44q";
 
   const setState = (type, html) => {
     state.hidden = false;
@@ -149,14 +149,19 @@
     emit("payment_started");
 
     try {
+      if (!window.Razorpay) {
+        throw new Error("Razorpay Checkout did not load. Please check your internet connection and try again.");
+      }
+
       const registrationPayload = Object.fromEntries(data.entries());
       const response = await fetch("/api/scholarship/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(registrationPayload)
       });
-      if (!response.ok) throw new Error("Payment backend is not configured yet.");
       const order = await response.json();
+      if (!response.ok) throw new Error(order.error || "Payment backend is not configured yet.");
+
       const options = {
         key: order.keyId || publicKeyPlaceholder,
         amount: order.amount || feeAmount,
@@ -166,16 +171,24 @@
         order_id: order.orderId,
         prefill: { name: registrationPayload.parentName, email: registrationPayload.email, contact: registrationPayload.mobile },
         handler: async (paymentResponse) => {
-          payButton.textContent = "Verifying payment...";
-          const verifyResponse = await fetch("/api/scholarship/verify-payment", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...paymentResponse, registrationId: order.registrationId })
-          });
-          if (!verifyResponse.ok) throw new Error("Payment verification failed.");
-          const verified = await verifyResponse.json();
-          emit("payment_success");
-          setState("success", `<h3>Registration successful</h3><p>Student: ${registrationPayload.studentName}</p><p>Reference: ${verified.registrationId || order.registrationId}</p><p>Payment ID: ${paymentResponse.razorpay_payment_id}</p><p>Amount paid: Rs 149</p><a class="button primary" href="index.html">Return to homepage</a>`);
+          try {
+            payButton.textContent = "Verifying payment...";
+            const verifyResponse = await fetch("/api/scholarship/verify-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ...paymentResponse, registrationId: order.registrationId })
+            });
+            const verified = await verifyResponse.json();
+            if (!verifyResponse.ok) throw new Error(verified.error || "Payment verification failed.");
+            emit("payment_success");
+            setState("success", `<h3>Registration successful</h3><p>Student: ${registrationPayload.studentName}</p><p>Reference: ${verified.registrationId || order.registrationId}</p><p>Payment ID: ${paymentResponse.razorpay_payment_id}</p><p>Amount paid: Rs 149</p><a class="button primary" href="index.html">Return to homepage</a>`);
+          } catch (verifyError) {
+            emit("payment_failed", { reason: "verification_failed" });
+            setState("failed", `<h3>Payment verification failed</h3><p>${verifyError.message}</p><p>If money was deducted, please contact Genesis with your Razorpay payment ID.</p><a class="button primary" href="#register">Retry Payment</a>`);
+          } finally {
+            payButton.disabled = false;
+            payButton.textContent = "Proceed to Secure Payment";
+          }
         },
         modal: { ondismiss: () => { emit("payment_failed", { reason: "cancelled" }); setState("cancelled", `<h3>Payment cancelled</h3><p>Your registration has not been confirmed. You can retry payment when ready.</p><a class="button primary" href="#register">Retry Payment</a>`); payButton.disabled = false; payButton.textContent = "Proceed to Secure Payment"; } }
       };
