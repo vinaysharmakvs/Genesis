@@ -12,6 +12,22 @@
   };
   emit("scholarship_page_view");
 
+  const modeTabs = [...document.querySelectorAll("[data-test-mode-tab]")];
+  const modePanels = [...document.querySelectorAll("[data-test-mode-panel]")];
+  const modeRegisterLinks = [...document.querySelectorAll("[data-mode-register]")];
+  const selectTestMode = (mode) => {
+    modeTabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.testModeTab === mode));
+    modePanels.forEach((panel) => panel.classList.toggle("active", panel.dataset.testModePanel === mode));
+    const testModeSelect = document.querySelector('[name="testMode"]');
+    if (testModeSelect) testModeSelect.value = mode === "online" ? "Online supervised test" : "Offline at Genesis campus";
+    emit("test_mode_selected", { mode });
+  };
+  modeTabs.forEach((tab) => tab.addEventListener("click", () => selectTestMode(tab.dataset.testModeTab)));
+  modeRegisterLinks.forEach((link) => link.addEventListener("click", () => {
+    const value = link.dataset.modeRegister || "";
+    selectTestMode(value.toLowerCase().includes("online") ? "online" : "offline");
+  }));
+
   const assessmentOutput = document.querySelector("[data-assessment-output]");
   const assessmentCopy = {
     objective: { title: "Sample objective question", text: "If a student solves 36 questions in 45 minutes, what does that say about speed and accuracy under time pressure?" },
@@ -36,9 +52,24 @@
     const row = patternData[key];
     panel.innerHTML = `
       <div class="pattern-live-card">
-        <div class="pattern-score-ring" style="--objective:${row.objective}%">
-          <span>${row.objective}%</span>
-          <small>Objective weight</small>
+        <div class="pattern-visual-stage">
+          <span class="pattern-signal-pill">Live structure preview</span>
+          <div class="pattern-score-ring" style="--objective:${row.objective}%">
+            <span>${row.objective}%</span>
+            <small>Objective weight</small>
+          </div>
+          <div class="pattern-visual-meta">
+            <strong>${row.questions} question structure</strong>
+            <p>${row.approach} with a balanced mix of speed, clarity and explanation quality.</p>
+            <div class="pattern-meter-row">
+              <b>Objective focus</b>
+              <div class="pattern-meter-track" style="--meter:${row.objective}%"><i></i></div>
+            </div>
+            <div class="pattern-meter-row">
+              <b>Subjective focus</b>
+              <div class="pattern-meter-track" style="--meter:${row.subjective}%"><i></i></div>
+            </div>
+          </div>
         </div>
         <div class="pattern-focus">
           <span>${row.group}</span>
