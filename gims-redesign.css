@@ -163,7 +163,7 @@ body.gims-redesign .gims-footer {
 
 body.gims-redesign .gims-hero,
 body.gims-redesign .section,
-body.gims-redesign .gims-flow-strip {
+body.gims-redesign .gims-dates-section {
   width: min(1180px, calc(100% - 32px)) !important;
   max-width: 1180px !important;
   margin: 0 auto !important;
@@ -384,24 +384,108 @@ body.gims-redesign .scholarship-float strong {
   font-size: 2rem !important;
 }
 
+body.gims-redesign .gims-dates-section {
+  position: relative !important;
+  margin-top: 2px !important;
+  margin-bottom: 26px !important;
+  border: 1px solid var(--gims-line) !important;
+  border-radius: 26px !important;
+  background:
+    radial-gradient(circle at 10% 18%, rgba(255, 216, 74, 0.16), transparent 16rem),
+    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,250,236,0.94)) !important;
+  box-shadow: 0 18px 48px rgba(7, 7, 7, 0.08) !important;
+  padding: 18px !important;
+}
+
+body.gims-redesign .gims-dates-head {
+  display: flex !important;
+  align-items: end !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  margin-bottom: 14px !important;
+}
+
+body.gims-redesign .gims-dates-head h3 {
+  margin: 0 !important;
+  color: #111 !important;
+  font-size: 1.28rem !important;
+  line-height: 1 !important;
+}
+
+body.gims-redesign .gims-dates-controls {
+  display: inline-flex !important;
+  gap: 8px !important;
+}
+
+body.gims-redesign .gims-dates-controls button {
+  width: 38px !important;
+  height: 38px !important;
+  border: 1px solid rgba(7, 7, 7, 0.1) !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  color: #111 !important;
+  font-size: 1.15rem !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+  box-shadow: 0 10px 24px rgba(7, 7, 7, 0.08) !important;
+}
+
+body.gims-redesign .gims-dates-controls button:disabled {
+  opacity: 0.36 !important;
+  cursor: default !important;
+}
+
 body.gims-redesign .gims-flow-strip {
   display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
   gap: 12px !important;
-  margin-bottom: 26px !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 body.gims-redesign .gims-flow-strip a {
   display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  min-height: 70px !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  min-height: 112px !important;
   border: 1px solid var(--gims-line) !important;
   border-radius: 20px !important;
   background: rgba(255, 255, 255, 0.86) !important;
   box-shadow: 0 14px 38px rgba(7, 7, 7, 0.07) !important;
   padding: 14px !important;
   font-weight: 950 !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+body.gims-redesign .gims-flow-strip strong {
+  color: #111 !important;
+  font-size: 1rem !important;
+  line-height: 1.1 !important;
+}
+
+body.gims-redesign .gims-flow-strip small {
+  color: #5d5d5d !important;
+  font-size: 0.82rem !important;
+  line-height: 1.35 !important;
+  font-weight: 800 !important;
+}
+
+body.gims-redesign .gims-flow-strip a::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: auto 14px 0 14px !important;
+  height: 3px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, var(--gims-yellow), rgba(255, 216, 74, 0)) !important;
+}
+
+body.gims-redesign .gims-dates-dots {
+  display: none !important;
 }
 
 body.gims-redesign .gims-flow-strip span,
@@ -1306,6 +1390,7 @@ body.gims-redesign .reveal.visible {
 
   body.gims-redesign .payment-card {
     grid-column: auto !important;
+    grid-row: auto !important;
   }
 
   body.gims-redesign .detail-dashboard,
@@ -1449,14 +1534,115 @@ body.gims-redesign .reveal.visible {
   }
 
   body.gims-redesign .hero-actions,
-  body.gims-redesign .gims-flow-strip,
-  body.gims-redesign .detail-dashboard,
   body.gims-redesign .participate-grid,
-  body.gims-redesign .achiever-grid,
-  body.gims-redesign .genesis-proof-strip,
   body.gims-redesign .form-grid {
     grid-template-columns: 1fr !important;
     display: grid !important;
+  }
+
+  body.gims-redesign .gims-dates-section {
+    padding: 14px !important;
+    border-radius: 22px !important;
+    margin-bottom: 18px !important;
+  }
+
+  body.gims-redesign .gims-dates-head {
+    align-items: center !important;
+    margin-bottom: 10px !important;
+  }
+
+  body.gims-redesign .gims-dates-head h3 {
+    font-size: 1.05rem !important;
+  }
+
+  body.gims-redesign .gims-dates-controls {
+    display: inline-flex !important;
+  }
+
+  body.gims-redesign .gims-flow-strip {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 2px 2px 10px !important;
+    margin-bottom: 18px !important;
+  }
+
+  body.gims-redesign .gims-flow-strip::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  body.gims-redesign .gims-flow-strip a {
+    flex: 0 0 84% !important;
+    min-width: 84% !important;
+    min-height: 110px !important;
+    scroll-snap-align: start !important;
+  }
+
+  body.gims-redesign .gims-dates-dots {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    margin-top: 10px !important;
+  }
+
+  body.gims-redesign .gims-dates-dots button {
+    width: 8px !important;
+    height: 8px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: rgba(17, 17, 17, 0.16) !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+  }
+
+  body.gims-redesign .gims-dates-dots button.active {
+    width: 22px !important;
+    background: #111 !important;
+  }
+
+  body.gims-redesign .detail-dashboard,
+  body.gims-redesign .highlight-strip,
+  body.gims-redesign .achiever-grid,
+  body.gims-redesign .genesis-proof-strip {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 2px 2px 10px !important;
+    margin: 0 !important;
+  }
+
+  body.gims-redesign .detail-dashboard::-webkit-scrollbar,
+  body.gims-redesign .highlight-strip::-webkit-scrollbar,
+  body.gims-redesign .achiever-grid::-webkit-scrollbar,
+  body.gims-redesign .genesis-proof-strip::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  body.gims-redesign .detail-dashboard article,
+  body.gims-redesign .highlight-strip article,
+  body.gims-redesign .achiever-grid article,
+  body.gims-redesign .genesis-proof-strip article {
+    flex: 0 0 84% !important;
+    min-width: 84% !important;
+    scroll-snap-align: start !important;
+  }
+
+  body.gims-redesign .detail-dashboard article {
+    min-height: 160px !important;
+  }
+
+  body.gims-redesign .highlight-strip article,
+  body.gims-redesign .achiever-grid article,
+  body.gims-redesign .genesis-proof-strip article {
+    min-height: 0 !important;
   }
 
   body.gims-redesign .button,
@@ -1485,13 +1671,109 @@ body.gims-redesign .reveal.visible {
     padding: 20px !important;
   }
 
+  body.gims-redesign .pattern-shell {
+    padding: 16px !important;
+  }
+
+  body.gims-redesign .pattern-tabs {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  body.gims-redesign .pattern-tabs button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
   body.gims-redesign .pattern-live-card {
     grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    padding: 14px !important;
+    border-radius: 22px !important;
+  }
+
+  body.gims-redesign .pattern-visual-stage,
+  body.gims-redesign .pattern-focus,
+  body.gims-redesign .pattern-stat-grid {
+    min-width: 0 !important;
+  }
+
+  body.gims-redesign .pattern-visual-stage {
+    min-height: auto !important;
+    gap: 12px !important;
+    padding: 14px !important;
+    border-radius: 20px !important;
+  }
+
+  body.gims-redesign .pattern-visual-stage::before {
+    inset: 12px !important;
+    border-radius: 16px !important;
   }
 
   body.gims-redesign .pattern-score-ring {
     min-height: 108px !important;
     padding: 16px !important;
+    border-radius: 22px !important;
+  }
+
+  body.gims-redesign .pattern-score-ring span {
+    font-size: 2.35rem !important;
+  }
+
+  body.gims-redesign .pattern-stat-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  body.gims-redesign .pattern-stat-grid article {
+    min-height: 0 !important;
+    padding: 12px !important;
+  }
+
+  body.gims-redesign .registration-journey {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      "form"
+      "mode"
+      "payment" !important;
+    gap: 14px !important;
+  }
+
+  body.gims-redesign .registration-journey > * {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body.gims-redesign .registration-form-card,
+  body.gims-redesign .test-mode-section,
+  body.gims-redesign .payment-card {
+    padding: 18px !important;
+    border-radius: 20px !important;
+  }
+
+  body.gims-redesign .payment-card {
+    grid-row: auto !important;
+    grid-column: auto !important;
+  }
+
+  body.gims-redesign .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  body.gims-redesign .test-mode-toggle {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.gims-redesign .payment-summary-inline div {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: start !important;
+    gap: 8px !important;
   }
 
   body.gims-redesign .masterclass-card {
