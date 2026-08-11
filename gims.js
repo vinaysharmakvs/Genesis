@@ -7,6 +7,71 @@
   });
   nav?.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => nav.classList.remove("open")));
 
+  const datesTrack = document.querySelector("[data-dates-track]");
+  const datesPrev = document.querySelector("[data-dates-prev]");
+  const datesNext = document.querySelector("[data-dates-next]");
+  const datesDots = document.querySelector("[data-dates-dots]");
+  const dateCards = datesTrack ? [...datesTrack.querySelectorAll("a")] : [];
+  let currentDateIndex = 0;
+
+  if (datesTrack && dateCards.length) {
+    const dotButtons = dateCards.map((_, index) => {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.setAttribute("aria-label", `Go to date ${index + 1}`);
+      dot.addEventListener("click", () => {
+        currentDateIndex = index;
+        dateCards[index].scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+        updateDateSlider();
+      });
+      datesDots?.appendChild(dot);
+      return dot;
+    });
+
+    const findNearestDateIndex = () => {
+      const left = datesTrack.scrollLeft;
+      let nearest = 0;
+      let minDiff = Number.POSITIVE_INFINITY;
+      dateCards.forEach((card, index) => {
+        const diff = Math.abs(card.offsetLeft - left);
+        if (diff < minDiff) {
+          minDiff = diff;
+          nearest = index;
+        }
+      });
+      return nearest;
+    };
+
+    const updateDateSlider = () => {
+      currentDateIndex = findNearestDateIndex();
+      dotButtons.forEach((dot, index) => dot.classList.toggle("active", index === currentDateIndex));
+      const atMobile = window.matchMedia("(max-width: 760px)").matches;
+      if (datesPrev) datesPrev.disabled = atMobile && currentDateIndex === 0;
+      if (datesNext) datesNext.disabled = atMobile && currentDateIndex === dateCards.length - 1;
+    };
+
+    datesPrev?.addEventListener("click", () => {
+      currentDateIndex = Math.max(0, currentDateIndex - 1);
+      dateCards[currentDateIndex].scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+      updateDateSlider();
+    });
+
+    datesNext?.addEventListener("click", () => {
+      currentDateIndex = Math.min(dateCards.length - 1, currentDateIndex + 1);
+      dateCards[currentDateIndex].scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+      updateDateSlider();
+    });
+
+    let datesScrollTimer;
+    datesTrack.addEventListener("scroll", () => {
+      clearTimeout(datesScrollTimer);
+      datesScrollTimer = setTimeout(updateDateSlider, 70);
+    }, { passive: true });
+
+    window.addEventListener("resize", updateDateSlider);
+    updateDateSlider();
+  }
+
   const emit = (name, data = {}) => {
     window.dataLayer?.push?.({ event: name, ...data });
   };
