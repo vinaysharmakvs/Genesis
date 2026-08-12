@@ -5089,6 +5089,7 @@ body {
   }
 }
 
+
 /* Compact final CTA: keep the photo visible while making the actions easier to scan. */
 .genesis-share-cta {
   width: calc(100% - 28px);
@@ -5214,5 +5215,110 @@ body {
     min-height: 44px;
     margin-top: 14px;
     font-size: .9rem;
+  }
+}
+
+/* Mobile registration surface: prevent the page background from washing out
+   the lower fields while the user moves through the form. */
+.registration-form {
+  padding: 18px;
+  border: 1px solid rgba(125, 160, 194, .24);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #0d2138, #071426);
+  box-shadow: 0 18px 38px rgba(3, 10, 24, .2);
+}
+
+.registration-form > label input,
+.registration-form > label select {
+  color: #f7fbff;
+  background: rgba(255, 255, 255, .055);
+}
+
+.registration-form > label input::placeholder,
+.registration-form select:invalid {
+  color: #a9bad0;
+  opacity: 1;
+}
+
+.exam-mode-field > p {
+  margin: 0;
+  color: #dce8f5;
+}
+
+.exam-mode-option > span {
+  color: #f7fbff;
+  background: rgba(255, 255, 255, .045);
+}
+
+.exam-mode-option small {
+  color: #b8cce0;
+}
+
+.fixed-registration-fee {
+  border-color: #47708e;
+  background: rgba(124, 216, 232, .1);
+  color: #f7fbff;
+}
+
+.form-message {
+  color: #ffd84a;
+}
+
+@media (max-width: 700px) {
+  .registration-form {
+    gap: 12px;
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .registration-form > label input,
+  .registration-form > label select {
+    height: 54px;
+    padding: 0 14px;
+    border-radius: 12px;
+    font-size: .92rem;
+  }
+
+  .exam-mode-field {
+    gap: 7px;
+    margin-top: 2px;
+  }
+
+  .exam-mode-options {
+    gap: 8px;
+  }
+
+  .exam-mode-option {
+    min-height: 56px;
+  }
+
+  .exam-mode-option > span {
+    padding: 9px 11px;
+    border-radius: 11px;
+  }
+
+  .exam-mode-option strong {
+    font-size: .88rem;
+  }
+
+  .exam-mode-option small {
+    font-size: .68rem;
+  }
+
+  .fixed-registration-fee {
+    min-height: 44px;
+    padding: 8px 10px;
+    font-size: .8rem;
+  }
+
+  .fixed-registration-fee > span {
+    width: 22px;
+    height: 22px;
+    font-size: .72rem;
+  }
+
+  .submit-button {
+    min-height: 48px;
+    font-size: .88rem;
   }
 }
