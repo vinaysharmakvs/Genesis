@@ -3229,6 +3229,86 @@ select {
   }
 }
 
+/* GIMS hero photo treatment: echo the final CTA while keeping all copy readable. */
+.hero .hero-panel {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, .94) 0%, rgba(255, 253, 242, .88) 52%, rgba(255, 245, 196, .62) 100%),
+    url("assets/background_header.jpeg") center 42% / cover no-repeat;
+  color: #071426;
+}
+
+.hero .hero-panel::before {
+  background-image:
+    linear-gradient(rgba(7, 20, 38, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(7, 20, 38, .035) 1px, transparent 1px);
+}
+
+.hero .hero-panel::after {
+  border-color: rgba(255, 219, 88, .62);
+}
+
+.hero .hero-panel h1,
+.hero .hero-panel .hero-audience {
+  color: #071426;
+  text-shadow: 0 2px 15px rgba(255, 255, 255, .72);
+}
+
+.hero .hero-panel .hero-supporting-copy {
+  color: #344c65;
+  text-shadow: 0 2px 12px rgba(255, 255, 255, .78);
+}
+
+.hero .hero-panel .hero-event-name,
+.hero .hero-secondary-action,
+.hero .hero-key-facts a {
+  border-color: rgba(255, 255, 255, .24);
+  background: rgba(255, 255, 255, .78);
+  color: #071426;
+  backdrop-filter: blur(12px);
+}
+
+.hero .hero-panel .hero-event-name {
+  border-color: rgba(7, 20, 38, .14);
+  color: #3e556d;
+}
+
+.hero .hero-primary-action {
+  background: var(--yellow);
+  color: #071426;
+}
+
+.hero .hero-key-facts small {
+  color: #60758a;
+}
+
+.hero .hero-key-facts strong {
+  color: #071426;
+}
+
+.hero .hero-key-facts i {
+  color: rgba(7, 20, 38, .18);
+}
+
+@media (max-width: 720px) {
+  .hero .hero-panel {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, .84), rgba(255, 251, 229, .91)),
+      url("assets/background_header.jpeg") center / cover no-repeat;
+  }
+
+  .hero .hero-event-name {
+    width: auto;
+    max-width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .hero .hero-event-name span {
+    display: inline;
+    font-size: .72rem;
+  }
+}
+
 /* Registration flow correction after the expanded interactive hero. */
 .registration .registration-intro {
   display: grid;
