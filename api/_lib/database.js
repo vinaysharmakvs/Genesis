@@ -55,6 +55,9 @@ const ensureSchema = async () => {
       mobile TEXT NOT NULL,
       email TEXT NOT NULL,
       test_mode TEXT NOT NULL,
+      present_board TEXT,
+      test_center TEXT,
+      qualified_stage_1 BOOLEAN NOT NULL DEFAULT FALSE,
       fee_amount INTEGER NOT NULL,
       currency TEXT NOT NULL DEFAULT 'INR',
       razorpay_order_id TEXT UNIQUE,
@@ -65,6 +68,9 @@ const ensureSchema = async () => {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `);
+  await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS present_board TEXT");
+  await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS test_center TEXT");
+  await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS qualified_stage_1 BOOLEAN NOT NULL DEFAULT FALSE");
   await run(`
     CREATE TABLE IF NOT EXISTS genesis.payment_transactions (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -123,10 +129,10 @@ const savePendingRegistration = async ({ registrationId, order, registration, am
     `
       INSERT INTO genesis.scholarship_registrations (
         registration_id, user_id, student_name, parent_name, grade, school_name,
-        city, state, mobile, email, test_mode, fee_amount, currency,
+        city, state, mobile, email, test_mode, present_board, test_center, qualified_stage_1, fee_amount, currency,
         razorpay_order_id, payment_status, registration_status
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'payment_pending', 'payment_pending')
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 'payment_pending', 'payment_pending')
       ON CONFLICT (registration_id)
       DO UPDATE SET
         razorpay_order_id = EXCLUDED.razorpay_order_id,
@@ -144,7 +150,10 @@ const savePendingRegistration = async ({ registrationId, order, registration, am
       registration.mobile,
       registration.email,
       registration.testMode,
-      amount,
+      registration.presentBoard,
+      registration.testCenter,
+      false,
+      amount / 100,
       currency,
       order.id
     ]
@@ -158,6 +167,56 @@ const savePendingRegistration = async ({ registrationId, order, registration, am
       VALUES ($1, $2, $3, $4, 'order_created', $5::jsonb)
     `,
     [registrationId, order.id, amount, currency, JSON.stringify(order)]
+  );
+
+  return { saved: true };
+};
+
+const saveQualifiedRegistration = async ({ registrationId, registration, currency }) => {
+  if (!(await ensureSchema())) return { saved: false, reason: "DATABASE_URL not configured" };
+
+  const userResult = await run(
+    `
+      INSERT INTO genesis.users (full_name, email, mobile, city, state)
+      VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT (email)
+      DO UPDATE SET
+        full_name = EXCLUDED.full_name,
+        mobile = EXCLUDED.mobile,
+        city = EXCLUDED.city,
+        state = EXCLUDED.state,
+        updated_at = NOW()
+      RETURNING id
+    `,
+    [registration.parentName, registration.email, registration.mobile, registration.city, registration.state]
+  );
+  const userId = userResult.rows[0]?.id;
+
+  await run(
+    `
+      INSERT INTO genesis.scholarship_registrations (
+        registration_id, user_id, student_name, parent_name, grade, school_name,
+        city, state, mobile, email, test_mode, present_board, test_center,
+        qualified_stage_1, fee_amount, currency, payment_status, registration_status, verified_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, TRUE, 0, $14, 'not_required', 'confirmed', NOW())
+    `,
+    [
+      registrationId,
+      userId,
+      registration.studentName,
+      registration.parentName,
+      registration.grade,
+      registration.schoolName,
+      registration.city,
+      registration.state,
+      registration.mobile,
+      registration.email,
+      registration.testMode,
+      registration.presentBoard,
+      registration.testCenter,
+      currency
+    ]
   );
 
   return { saved: true };
@@ -214,5 +273,6 @@ const markPaymentVerified = async ({ registrationId, payment }) => {
 module.exports = {
   ensureSchema,
   savePendingRegistration,
+  saveQualifiedRegistration,
   markPaymentVerified
 };
