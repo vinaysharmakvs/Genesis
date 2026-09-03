@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Genesis Ignited Minds Scholarship Test 2026</title>
     <meta name="description" content="GIMS 2026 is a scholarship test for students in Grades 7–11, combining objective and subjective assessment, test discussion, recognition and an opportunity to earn up to 100% scholarship." />
-    <link rel="icon" href="public/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="gims2026.css?v=20260813-compact" />
   </head>
   <body>
@@ -121,11 +121,25 @@
               </div>
             </div>
 
-            <div class="fixed-registration-fee">
-              <span aria-hidden="true">₹</span>
+            <div class="exam-mode-field qualified-stage-field">
+              <p>Qualified Stage 1 Through School?</p>
+              <div class="exam-mode-options" role="radiogroup" aria-label="Qualified Stage 1 Through School">
+                <label class="exam-mode-option">
+                  <input type="radio" name="qualifiedStage1" value="Yes" required />
+                  <span><strong>Yes</strong></span>
+                </label>
+                <label class="exam-mode-option">
+                  <input type="radio" name="qualifiedStage1" value="No" />
+                  <span><strong>No</strong></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="fixed-registration-fee" data-registration-fee>
+              <span aria-hidden="true" data-fee-icon>₹</span>
               <div>
-                <strong>Registration Fee: ₹149 <em>Early Bird</em></strong>
-                <small>Regular fee: ₹199</small>
+                <strong data-fee-title>Registration Fee: ₹149 <em>Early Bird</em></strong>
+                <small data-fee-note>Regular fee: ₹199</small>
               </div>
             </div>
 
@@ -202,16 +216,16 @@
             </div>
             <div class="gims-exam-gallery-track">
               <figure class="gims-exam-photo gims-exam-photo-featured">
-                <img src="assets/Center4.png" alt="Students writing an examination in a Genesis classroom" loading="lazy" />
+                <picture><source srcset="assets/Center4.webp" type="image/webp" /><img src="assets/Center4.png" alt="Students writing an examination in a Genesis classroom" loading="lazy" decoding="async" width="1672" height="941" /></picture>
               </figure>
               <figure class="gims-exam-photo">
-                <img src="assets/Center1.png" alt="Genesis students concentrating on their examination papers" loading="lazy" />
+                <picture><source srcset="assets/Center1.webp" type="image/webp" /><img src="assets/Center1.png" alt="Genesis students concentrating on their examination papers" loading="lazy" decoding="async" width="941" height="1672" /></picture>
               </figure>
               <figure class="gims-exam-photo">
-                <img src="assets/Center2.png" alt="Students taking a supervised test at Genesis" loading="lazy" />
+                <picture><source srcset="assets/Center2.webp" type="image/webp" /><img src="assets/Center2.png" alt="Students taking a supervised test at Genesis" loading="lazy" decoding="async" width="941" height="1672" /></picture>
               </figure>
               <figure class="gims-exam-photo">
-                <img src="assets/Center3.png" alt="Students completing written assessment papers at Genesis" loading="lazy" />
+                <picture><source srcset="assets/Center3.webp" type="image/webp" /><img src="assets/Center3.png" alt="Students completing written assessment papers at Genesis" loading="lazy" decoding="async" width="940" height="1672" /></picture>
               </figure>
             </div>
           </section>
@@ -222,7 +236,7 @@
               <p>GIMS gives students an opportunity to understand where they stand, learn from performance and discover what they are capable of.</p>
             </div>
             <div class="about-gims-portrait">
-              <img src="assets/Gensis3D_1.png" alt="Genesis student representing the GIMS scholarship journey" />
+              <picture><source srcset="assets/Gensis3D_1.webp" type="image/webp" /><img src="assets/Gensis3D_1.png" alt="Genesis student representing the GIMS scholarship journey" loading="lazy" decoding="async" width="1536" height="1024" /></picture>
             </div>
             <div class="about-gims-story">
               <h3>We Make Champions with Care</h3>
@@ -305,7 +319,7 @@
           <section class="neiv-story" aria-labelledby="neiv-story-title">
             <div class="neiv-story-visual">
               <div class="neiv-image-frame">
-                <img src="assets/Genesis3DHero.png" alt="Neiv Gupta, Genesis student and JEE Main 2026 achiever" />
+                <picture><source srcset="assets/Genesis3DHero.webp" type="image/webp" /><img src="assets/Genesis3DHero.png" alt="Neiv Gupta, Genesis student and JEE Main 2026 achiever" loading="lazy" decoding="async" width="1024" height="1536" /></picture>
               </div>
               <span>4 Years with Genesis</span>
             </div>
@@ -455,6 +469,11 @@
       const form = document.querySelector('[data-gims2026-form]');
       const message = document.querySelector('[data-gims2026-message]');
       const payButton = document.querySelector('[data-gims2026-pay]');
+      const qualifiedStageInputs = document.querySelectorAll('input[name="qualifiedStage1"]');
+      const feeBox = document.querySelector('[data-registration-fee]');
+      const feeIcon = document.querySelector('[data-fee-icon]');
+      const feeTitle = document.querySelector('[data-fee-title]');
+      const feeNote = document.querySelector('[data-fee-note]');
       const paymentResult = document.querySelector('[data-gims2026-payment-result]');
       const samplePapersButton = document.querySelector('[data-sample-papers-open]');
       const samplePapersModal = document.querySelector('[data-sample-papers-modal]');
@@ -479,19 +498,27 @@
         paymentResult.innerHTML = `<h3>${title}</h3><p>${body}</p>`;
         paymentResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
       };
-      const setLoading = (loading, label = 'Register for GIMS 2026') => {
+      const isStageOneQualified = () => form.elements.qualifiedStage1?.value === 'Yes';
+      const defaultSubmitLabel = () => isStageOneQualified() ? 'Complete Free Registration' : 'Register for GIMS 2026';
+      const updateQualificationFee = () => {
+        const qualified = isStageOneQualified();
+        feeBox.classList.toggle('is-waived', qualified);
+        feeIcon.textContent = qualified ? '✓' : '₹';
+        feeTitle.innerHTML = qualified ? 'Registration Fee: ₹0 <em>Waived</em>' : 'Registration Fee: ₹149 <em>Early Bird</em>';
+        feeNote.textContent = qualified ? 'Stage 1 qualified through school' : 'Regular fee: ₹199';
+        payButton.textContent = defaultSubmitLabel();
+      };
+      qualifiedStageInputs.forEach((input) => input.addEventListener('change', updateQualificationFee));
+
+      const setLoading = (loading, label = defaultSubmitLabel()) => {
         payButton.disabled = loading;
-        payButton.textContent = loading ? label : 'Register for GIMS 2026';
+        payButton.textContent = loading ? label : defaultSubmitLabel();
       };
 
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
         message.textContent = '';
         if (!form.reportValidity()) return;
-        if (!window.Razorpay) {
-          showPaymentResult('failed', 'Secure payment is unavailable', 'Please check your internet connection and try again.');
-          return;
-        }
 
         const data = new FormData(form);
         const payload = {
@@ -506,10 +533,16 @@
           testMode: data.get('testMode'),
           presentBoard: data.get('presentBoard'),
           testCenter: data.get('testCenter'),
+          qualifiedStage1: data.get('qualifiedStage1'),
           registrationFee: '14900'
         };
 
-        setLoading(true, 'Creating secure order...');
+        if (payload.qualifiedStage1 !== 'Yes' && !window.Razorpay) {
+          showPaymentResult('failed', 'Secure payment is unavailable', 'Please check your internet connection and try again.');
+          return;
+        }
+
+        setLoading(true, payload.qualifiedStage1 === 'Yes' ? 'Saving registration...' : 'Creating secure order...');
         try {
           const response = await fetch('/api/scholarship/create-order', {
             method: 'POST',
@@ -517,7 +550,15 @@
             body: JSON.stringify(payload)
           });
           const order = await response.json();
-          if (!response.ok) throw new Error(order.error || 'Unable to create the payment order.');
+          if (!response.ok) throw new Error(order.error || 'Unable to complete the registration.');
+
+          if (order.paymentRequired === false) {
+            showPaymentResult('success', 'Registration successful', `Thank you, ${payload.studentName}. Your qualified Stage 1 registration is confirmed with no registration fee. Reference: ${order.registrationId}.`);
+            form.reset();
+            updateQualificationFee();
+            setLoading(false);
+            return;
+          }
 
           const razorpay = new Razorpay({
             key: order.keyId,
