@@ -1,10 +1,11 @@
 const crypto = require("crypto");
-const { savePendingRegistration } = require("../_lib/database");
+const { savePendingRegistration, saveQualifiedRegistration } = require("../_lib/database");
 
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "rzp_test_xe08dTmycCK44q";
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 const FEE_AMOUNT_PAISE = 14900;
 const CURRENCY = "INR";
+const ALLOWED_FEE_AMOUNTS = new Set([14900, 20000, 30000]);
 
 const sendJson = (response, status, payload) => {
   response.statusCode = status;
@@ -23,12 +24,14 @@ const cleanText = (value = "", max = 120) =>
   String(value).replace(/[<>]/g, "").replace(/\s+/g, " ").trim().slice(0, max);
 
 const validateRegistration = (data) => {
-  const required = ["studentName", "parentName", "grade", "schoolName", "city", "state", "mobile", "email", "testMode"];
+  const required = ["studentName", "parentName", "grade", "schoolName", "city", "state", "mobile", "email", "testMode", "presentBoard", "testCenter", "qualifiedStage1"];
   for (const key of required) {
     if (!cleanText(data[key])) return `Missing required field: ${key}`;
   }
   if (!/^[6-9]\d{9}$/.test(cleanText(data.mobile))) return "Invalid Indian mobile number.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanText(data.email))) return "Invalid email address.";
+  if (!new Set(["yes", "no"]).has(cleanText(data.qualifiedStage1).toLowerCase())) return "Invalid Stage 1 qualification selection.";
+  if (data.registrationFee && !ALLOWED_FEE_AMOUNTS.has(Number(data.registrationFee))) return "Invalid registration fee.";
   return "";
 };
 
@@ -41,7 +44,11 @@ const normalizeRegistration = (data) => ({
   state: cleanText(data.state, 60),
   mobile: cleanText(data.mobile, 10),
   email: cleanText(data.email, 90).toLowerCase(),
-  testMode: cleanText(data.testMode, 60)
+  testMode: cleanText(data.testMode, 60),
+  presentBoard: cleanText(data.presentBoard, 20),
+  testCenter: cleanText(data.testCenter, 60),
+  qualifiedStage1: cleanText(data.qualifiedStage1, 3).toLowerCase() === "yes",
+  registrationFee: Number(data.registrationFee || FEE_AMOUNT_PAISE)
 });
 
 const createRazorpayOrder = async (payload) => {
@@ -69,10 +76,6 @@ module.exports = async (request, response) => {
     return sendJson(response, 405, { error: "Method not allowed" });
   }
 
-  if (!RAZORPAY_KEY_SECRET) {
-    return sendJson(response, 500, { error: "Razorpay secret is not configured on the server." });
-  }
-
   try {
     const data = await readJsonBody(request);
     const validationError = validateRegistration(data);
@@ -80,8 +83,30 @@ module.exports = async (request, response) => {
 
     const registration = normalizeRegistration(data);
     const registrationId = `GIMS-${new Date().getFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+
+    if (registration.qualifiedStage1) {
+      const database = await saveQualifiedRegistration({
+        registrationId,
+        registration,
+        currency: CURRENCY
+      });
+      if (!database.saved) {
+        return sendJson(response, 503, { error: "Registration database is unavailable. Please try again." });
+      }
+      return sendJson(response, 200, {
+        paymentRequired: false,
+        registrationId,
+        database
+      });
+    }
+
+    if (!RAZORPAY_KEY_SECRET) {
+      return sendJson(response, 500, { error: "Razorpay secret is not configured on the server." });
+    }
+
+    const amount = ALLOWED_FEE_AMOUNTS.has(registration.registrationFee) ? registration.registrationFee : FEE_AMOUNT_PAISE;
     const order = await createRazorpayOrder({
-      amount: FEE_AMOUNT_PAISE,
+      amount,
       currency: CURRENCY,
       receipt: registrationId,
       notes: {
@@ -91,7 +116,8 @@ module.exports = async (request, response) => {
         grade: registration.grade,
         mobile: registration.mobile,
         email: registration.email,
-        testMode: registration.testMode
+        testMode: registration.testMode,
+        registrationFee: String(amount)
       }
     });
 
@@ -99,11 +125,12 @@ module.exports = async (request, response) => {
       registrationId,
       order,
       registration,
-      amount: FEE_AMOUNT_PAISE,
+      amount,
       currency: CURRENCY
     });
 
     return sendJson(response, 200, {
+      paymentRequired: true,
       keyId: RAZORPAY_KEY_ID,
       registrationId,
       orderId: order.id,
