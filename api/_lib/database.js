@@ -270,9 +270,86 @@ const markPaymentVerified = async ({ registrationId, payment }) => {
   return { saved: true };
 };
 
+const getGimsDashboard = async () => {
+  if (!(await ensureSchema())) return null;
+
+  const [registrationsResult, transactionsResult, eventsResult] = await Promise.all([
+    run(`
+      SELECT
+        r.registration_id,
+        r.student_name,
+        r.parent_name,
+        r.grade,
+        r.school_name,
+        r.city,
+        r.state,
+        r.mobile,
+        r.email,
+        r.test_mode,
+        r.present_board,
+        r.test_center,
+        r.qualified_stage_1,
+        r.fee_amount,
+        r.currency,
+        r.razorpay_order_id,
+        r.payment_status,
+        r.registration_status,
+        r.created_at,
+        r.verified_at,
+        r.updated_at,
+        u.id AS user_id,
+        u.full_name AS user_full_name,
+        u.email AS user_email,
+        u.mobile AS user_mobile,
+        u.city AS user_city,
+        u.state AS user_state,
+        u.role AS user_role,
+        u.source AS user_source,
+        u.created_at AS user_created_at
+      FROM genesis.scholarship_registrations r
+      LEFT JOIN genesis.users u ON u.id = r.user_id
+      ORDER BY r.created_at DESC
+      LIMIT 2000
+    `),
+    run(`
+      SELECT
+        id,
+        registration_id,
+        razorpay_order_id,
+        razorpay_payment_id,
+        amount,
+        currency,
+        status,
+        created_at,
+        updated_at
+      FROM genesis.payment_transactions
+      ORDER BY created_at DESC
+      LIMIT 5000
+    `),
+    run(`
+      SELECT
+        id,
+        registration_id,
+        event_type,
+        COALESCE(payload, '{}'::jsonb) - 'razorpay_signature' - 'signature' AS payload,
+        created_at
+      FROM genesis.payment_event_logs
+      ORDER BY created_at DESC
+      LIMIT 5000
+    `)
+  ]);
+
+  return {
+    registrations: registrationsResult.rows,
+    transactions: transactionsResult.rows,
+    events: eventsResult.rows
+  };
+};
+
 module.exports = {
   ensureSchema,
   savePendingRegistration,
   saveQualifiedRegistration,
-  markPaymentVerified
+  markPaymentVerified,
+  getGimsDashboard
 };
