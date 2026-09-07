@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <title>GIMS 2026 | Registration Dashboard</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="gims-admin.css?v=20260907" />
+  </head>
+  <body>
+    <main class="admin-shell">
+      <section class="login-panel" data-login-panel>
+        <div class="login-card">
+          <a class="brand" href="index.html"><img src="assets/genesis_logo.jpeg" alt="Genesis Educates" /><span><strong>Genesis</strong><small>Educates</small></span></a>
+          <p class="eyebrow">Restricted Access</p>
+          <h1>GIMS 2026 Dashboard</h1>
+          <p>Enter the administrative security code to view registrations and payments.</p>
+          <form data-login-form>
+            <label for="securityCode">Security code</label>
+            <input id="securityCode" name="securityCode" type="password" autocomplete="current-password" required autofocus />
+            <button type="submit">Open Dashboard</button>
+            <p class="login-message" data-login-message role="alert"></p>
+          </form>
+        </div>
+      </section>
+
+      <section class="dashboard" data-dashboard hidden>
+        <header class="dashboard-header">
+          <div>
+            <p class="eyebrow">Genesis Ignited Minds Scholarship Test</p>
+            <h1>Registration Dashboard</h1>
+            <p class="sync-note" data-sync-note></p>
+          </div>
+          <div class="header-actions">
+            <button type="button" class="button secondary" data-refresh>Refresh</button>
+            <button type="button" class="button primary" data-export>Export CSV</button>
+            <button type="button" class="button quiet" data-logout>Logout</button>
+          </div>
+        </header>
+
+        <section class="stats-grid" aria-label="Registration summary">
+          <article><span>Total registrations</span><strong data-stat="total">0</strong></article>
+          <article><span>Confirmed</span><strong data-stat="confirmed">0</strong></article>
+          <article><span>Stage 1 qualified</span><strong data-stat="qualified">0</strong></article>
+          <article><span>Payments received</span><strong data-stat="paid">0</strong></article>
+          <article><span>Revenue received</span><strong data-stat="revenue">₹0</strong></article>
+        </section>
+
+        <section class="filters" aria-label="Dashboard filters">
+          <label class="search-field"><span>Search</span><input type="search" placeholder="Student, parent, phone, email, school or ID" data-search /></label>
+          <label><span>Board</span><select data-filter="present_board"><option value="">All boards</option></select></label>
+          <label><span>Test center</span><select data-filter="test_center"><option value="">All centers</option></select></label>
+          <label><span>Exam mode</span><select data-filter="test_mode"><option value="">All modes</option></select></label>
+          <label><span>Stage 1</span><select data-filter="qualified_stage_1"><option value="">All students</option><option value="true">Qualified</option><option value="false">Not qualified</option></select></label>
+          <label><span>Payment</span><select data-filter="payment_status"><option value="">All statuses</option></select></label>
+        </section>
+
+        <section class="table-panel">
+          <div class="table-heading"><h2>GIMS Registrations</h2><span data-result-count>0 records</span></div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Registration</th><th>Student</th><th>Parent &amp; contact</th><th>School</th><th>Exam</th><th>Stage 1</th><th>Payment</th><th></th></tr></thead>
+              <tbody data-registration-rows></tbody>
+            </table>
+          </div>
+          <div class="empty-state" data-empty-state hidden>No registrations match these filters.</div>
+        </section>
+      </section>
+    </main>
+
+    <dialog class="details-dialog" data-details-dialog>
+      <button class="dialog-close" type="button" data-dialog-close aria-label="Close details">×</button>
+      <div data-details-content></div>
+    </dialog>
+
+    <script src="gims-admin.js?v=20260907" defer></script>
+  </body>
+</html>
