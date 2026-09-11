@@ -14,9 +14,21 @@
   document.querySelectorAll("[data-focus]").forEach((el) => (el.textContent = member.focus));
 
   const portrait = document.querySelector("[data-portrait]");
+  const stage = document.querySelector(".profile-stage");
+  const revealProfile = () => {
+    if (!stage) return;
+    stage.classList.add("is-ready");
+    stage.setAttribute("aria-busy", "false");
+  };
+
   if (portrait) {
+    portrait.addEventListener("load", revealProfile, { once: true });
+    portrait.addEventListener("error", revealProfile, { once: true });
     portrait.src = member.profileImage || member.image;
     portrait.alt = `${member.name} — Genesis Educates profile`;
+    if (portrait.complete) revealProfile();
+  } else {
+    revealProfile();
   }
 
   const related = document.querySelector("[data-related]");
