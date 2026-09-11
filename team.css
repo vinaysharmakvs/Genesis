@@ -68,7 +68,8 @@ img { display: block; max-width: 100%; }
 .team-footer strong { color: #fff; }
 
 .profile-page { background: #071329; }
-.profile-stage { width: min(1180px, calc(100% - 36px)); margin: 38px auto; display: grid; grid-template-columns: minmax(320px, 520px) 1fr; gap: clamp(30px, 6vw, 90px); align-items: center; }
+.profile-stage { width: min(1180px, calc(100% - 36px)); margin: 38px auto; display: grid; grid-template-columns: minmax(320px, 520px) 1fr; gap: clamp(30px, 6vw, 90px); align-items: center; opacity: 0; transform: translateY(10px); transition: opacity .32s ease, transform .32s ease; }
+.profile-stage.is-ready { opacity: 1; transform: translateY(0); }
 .profile-poster { overflow: hidden; border: 1px solid rgba(255,255,255,.15); border-radius: 26px; background: #050505; box-shadow: 0 30px 80px rgba(0,0,0,.36); }
 .profile-poster img { width: 100%; height: auto; object-fit: contain; }
 .profile-summary { color: #fff; }
