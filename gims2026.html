@@ -478,6 +478,14 @@
       const samplePapersButton = document.querySelector('[data-sample-papers-open]');
       const samplePapersModal = document.querySelector('[data-sample-papers-modal]');
       const samplePapersCloseButtons = document.querySelectorAll('[data-sample-papers-close]');
+      document.querySelectorAll('picture > source[type="image/webp"] + img').forEach((image) => {
+        image.addEventListener('error', () => {
+          if (!image.currentSrc.toLowerCase().includes('.webp')) return;
+          const webpSource = image.previousElementSibling;
+          if (webpSource?.tagName === 'SOURCE') webpSource.remove();
+          image.src = image.getAttribute('src');
+        }, { once: true });
+      });
       const closeSamplePapers = () => {
         samplePapersModal.hidden = true;
         document.body.classList.remove('modal-open');
