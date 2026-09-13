@@ -122,7 +122,7 @@
           ${detailItem('Parent / guardian', row.parent_name)}${detailItem('Mobile', row.mobile)}${detailItem('Email', row.email)}
           ${detailItem('Class', row.grade)}${detailItem('Present board', row.present_board)}${detailItem('School', row.school_name)}
           ${detailItem('City', row.city)}${detailItem('State', row.state)}${detailItem('Test center', row.test_center)}
-          ${detailItem('Exam mode', row.test_mode)}${detailItem('Stage 1 through school', row.qualified_stage_1 ? 'Yes' : 'No')}${detailItem('Registration fee', money(row.fee_amount, row.currency))}
+          ${detailItem('Exam mode', row.test_mode)}${detailItem('Genesis student', row.genesis_student ? 'Yes' : 'No')}${detailItem('Stage 1 through school', row.qualified_stage_1 ? 'Yes' : 'No')}${detailItem('Registration fee', money(row.fee_amount, row.currency))}
           ${detailItem('Registration status', String(row.registration_status || '').replaceAll('_', ' '))}${detailItem('Payment status', String(row.payment_status || '').replaceAll('_', ' '))}${detailItem('Verified', formatDate(row.verified_at))}
           ${detailItem('Razorpay order ID', row.razorpay_order_id)}${detailItem('User ID', row.user_id)}${detailItem('User source', row.user_source)}
         </div>
@@ -133,7 +133,7 @@
   };
 
   const exportCsv = () => {
-    const fields = ['registration_id','student_name','parent_name','mobile','email','grade','school_name','present_board','city','state','test_center','test_mode','qualified_stage_1','fee_amount','currency','payment_status','registration_status','razorpay_order_id','created_at','verified_at'];
+    const fields = ['registration_id','student_name','parent_name','mobile','email','grade','school_name','present_board','city','state','test_center','test_mode','genesis_student','qualified_stage_1','fee_amount','currency','payment_status','registration_status','razorpay_order_id','created_at','verified_at'];
     const quote = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
     const csv = [fields.join(','), ...filteredRegistrations().map((row) => fields.map((field) => quote(row[field])).join(','))].join('\n');
     const link = document.createElement('a');
