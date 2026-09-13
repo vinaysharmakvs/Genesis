@@ -12,6 +12,19 @@
   document.querySelectorAll("[data-intro]").forEach((el) => (el.textContent = member.intro));
   document.querySelectorAll("[data-bio]").forEach((el) => (el.textContent = member.bio));
   document.querySelectorAll("[data-focus]").forEach((el) => (el.textContent = member.focus));
+  document.querySelectorAll("[data-quote]").forEach((el) => (el.textContent = `“${member.quote}”`));
+  const dots = document.querySelector("[data-dots]");
+  if (dots) {
+    dots.innerHTML = [0, 1, 2].map((dot) => `<span class="profile-dot${dot === 0 ? " is-active" : ""}" aria-hidden="true"></span>`).join("");
+  }
+
+  const currentIndex = team.indexOf(member);
+  const previous = team[(currentIndex - 1 + team.length) % team.length];
+  const next = team[(currentIndex + 1) % team.length];
+  const previousLink = document.querySelector("[data-prev]");
+  const nextLink = document.querySelector("[data-next]");
+  if (previousLink) { previousLink.href = `team-member.html?member=${encodeURIComponent(previous.slug)}`; previousLink.setAttribute("aria-label", `Previous: ${previous.name}`); }
+  if (nextLink) { nextLink.href = `team-member.html?member=${encodeURIComponent(next.slug)}`; nextLink.setAttribute("aria-label", `Next: ${next.name}`); }
 
   const portrait = document.querySelector("[data-portrait]");
   const stage = document.querySelector(".profile-stage");
@@ -24,7 +37,7 @@
   if (portrait) {
     portrait.addEventListener("load", revealProfile, { once: true });
     portrait.addEventListener("error", revealProfile, { once: true });
-    portrait.src = member.profileImage || member.image;
+    portrait.src = member.image;
     portrait.alt = `${member.name} — Genesis Educates profile`;
     if (portrait.complete) revealProfile();
   } else {
@@ -33,7 +46,6 @@
 
   const related = document.querySelector("[data-related]");
   if (related) {
-    const currentIndex = team.indexOf(member);
     const suggestions = [1, 2, 3].map((step) => team[(currentIndex + step) % team.length]);
     related.innerHTML = suggestions
       .map(
