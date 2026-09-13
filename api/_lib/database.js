@@ -58,6 +58,7 @@ const ensureSchema = async () => {
       present_board TEXT,
       test_center TEXT,
       qualified_stage_1 BOOLEAN NOT NULL DEFAULT FALSE,
+      genesis_student BOOLEAN NOT NULL DEFAULT FALSE,
       fee_amount INTEGER NOT NULL,
       currency TEXT NOT NULL DEFAULT 'INR',
       razorpay_order_id TEXT UNIQUE,
@@ -71,6 +72,7 @@ const ensureSchema = async () => {
   await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS present_board TEXT");
   await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS test_center TEXT");
   await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS qualified_stage_1 BOOLEAN NOT NULL DEFAULT FALSE");
+  await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS genesis_student BOOLEAN NOT NULL DEFAULT FALSE");
   await run(`
     CREATE TABLE IF NOT EXISTS genesis.payment_transactions (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -129,10 +131,10 @@ const savePendingRegistration = async ({ registrationId, order, registration, am
     `
       INSERT INTO genesis.scholarship_registrations (
         registration_id, user_id, student_name, parent_name, grade, school_name,
-        city, state, mobile, email, test_mode, present_board, test_center, qualified_stage_1, fee_amount, currency,
+        city, state, mobile, email, test_mode, present_board, test_center, qualified_stage_1, genesis_student, fee_amount, currency,
         razorpay_order_id, payment_status, registration_status
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 'payment_pending', 'payment_pending')
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, 'payment_pending', 'payment_pending')
       ON CONFLICT (registration_id)
       DO UPDATE SET
         razorpay_order_id = EXCLUDED.razorpay_order_id,
@@ -153,6 +155,7 @@ const savePendingRegistration = async ({ registrationId, order, registration, am
       registration.presentBoard,
       registration.testCenter,
       false,
+      registration.genesisStudent,
       amount / 100,
       currency,
       order.id
@@ -197,9 +200,9 @@ const saveQualifiedRegistration = async ({ registrationId, registration, currenc
       INSERT INTO genesis.scholarship_registrations (
         registration_id, user_id, student_name, parent_name, grade, school_name,
         city, state, mobile, email, test_mode, present_board, test_center,
-        qualified_stage_1, fee_amount, currency, payment_status, registration_status, verified_at
+        qualified_stage_1, genesis_student, fee_amount, currency, payment_status, registration_status, verified_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, TRUE, 0, $14, 'not_required', 'confirmed', NOW())
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, TRUE, $14, 0, $15, 'not_required', 'confirmed', NOW())
     `,
     [
       registrationId,
@@ -215,6 +218,7 @@ const saveQualifiedRegistration = async ({ registrationId, registration, currenc
       registration.testMode,
       registration.presentBoard,
       registration.testCenter,
+      registration.genesisStudent,
       currency
     ]
   );
@@ -289,6 +293,7 @@ const getGimsDashboard = async () => {
         r.present_board,
         r.test_center,
         r.qualified_stage_1,
+        r.genesis_student,
         r.fee_amount,
         r.currency,
         r.razorpay_order_id,
