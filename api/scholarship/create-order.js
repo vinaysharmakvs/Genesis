@@ -4,6 +4,7 @@ const { savePendingRegistration, saveQualifiedRegistration } = require("../_lib/
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "rzp_test_xe08dTmycCK44q";
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 const FEE_AMOUNT_PAISE = 14900;
+const GENESIS_STUDENT_FEE_PAISE = 10000;
 const CURRENCY = "INR";
 const ALLOWED_FEE_AMOUNTS = new Set([14900, 20000, 30000]);
 
@@ -24,13 +25,14 @@ const cleanText = (value = "", max = 120) =>
   String(value).replace(/[<>]/g, "").replace(/\s+/g, " ").trim().slice(0, max);
 
 const validateRegistration = (data) => {
-  const required = ["studentName", "parentName", "grade", "schoolName", "city", "state", "mobile", "email", "testMode", "presentBoard", "testCenter", "qualifiedStage1"];
+  const required = ["studentName", "parentName", "grade", "schoolName", "city", "state", "mobile", "email", "testMode", "presentBoard", "testCenter", "qualifiedStage1", "genesisStudent"];
   for (const key of required) {
     if (!cleanText(data[key])) return `Missing required field: ${key}`;
   }
   if (!/^[6-9]\d{9}$/.test(cleanText(data.mobile))) return "Invalid Indian mobile number.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanText(data.email))) return "Invalid email address.";
   if (!new Set(["yes", "no"]).has(cleanText(data.qualifiedStage1).toLowerCase())) return "Invalid Stage 1 qualification selection.";
+  if (!new Set(["yes", "no"]).has(cleanText(data.genesisStudent).toLowerCase())) return "Invalid Genesis student selection.";
   if (data.registrationFee && !ALLOWED_FEE_AMOUNTS.has(Number(data.registrationFee))) return "Invalid registration fee.";
   return "";
 };
@@ -48,6 +50,7 @@ const normalizeRegistration = (data) => ({
   presentBoard: cleanText(data.presentBoard, 20),
   testCenter: cleanText(data.testCenter, 60),
   qualifiedStage1: cleanText(data.qualifiedStage1, 3).toLowerCase() === "yes",
+  genesisStudent: cleanText(data.genesisStudent, 3).toLowerCase() === "yes",
   registrationFee: Number(data.registrationFee || FEE_AMOUNT_PAISE)
 });
 
@@ -104,7 +107,7 @@ module.exports = async (request, response) => {
       return sendJson(response, 500, { error: "Razorpay secret is not configured on the server." });
     }
 
-    const amount = ALLOWED_FEE_AMOUNTS.has(registration.registrationFee) ? registration.registrationFee : FEE_AMOUNT_PAISE;
+    const amount = registration.genesisStudent ? GENESIS_STUDENT_FEE_PAISE : FEE_AMOUNT_PAISE;
     const order = await createRazorpayOrder({
       amount,
       currency: CURRENCY,
