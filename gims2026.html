@@ -135,11 +135,25 @@
               </div>
             </div>
 
+            <div class="exam-mode-field qualified-stage-field">
+              <p>Genesis Student?</p>
+              <div class="exam-mode-options" role="radiogroup" aria-label="Genesis Student">
+                <label class="exam-mode-option">
+                  <input type="radio" name="genesisStudent" value="Yes" required />
+                  <span><strong>Yes</strong></span>
+                </label>
+                <label class="exam-mode-option">
+                  <input type="radio" name="genesisStudent" value="No" />
+                  <span><strong>No</strong></span>
+                </label>
+              </div>
+            </div>
+
             <div class="fixed-registration-fee" data-registration-fee>
               <span aria-hidden="true" data-fee-icon>₹</span>
               <div>
                 <strong data-fee-title>Registration Fee: ₹149 <em>Early Bird</em></strong>
-                <small data-fee-note>Regular fee: ₹199</small>
+                <small data-fee-note>Genesis students pay ₹100 · Regular fee: ₹199</small>
               </div>
             </div>
 
@@ -470,6 +484,7 @@
       const message = document.querySelector('[data-gims2026-message]');
       const payButton = document.querySelector('[data-gims2026-pay]');
       const qualifiedStageInputs = document.querySelectorAll('input[name="qualifiedStage1"]');
+      const genesisStudentInputs = document.querySelectorAll('input[name="genesisStudent"]');
       const feeBox = document.querySelector('[data-registration-fee]');
       const feeIcon = document.querySelector('[data-fee-icon]');
       const feeTitle = document.querySelector('[data-fee-title]');
@@ -507,16 +522,19 @@
         paymentResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
       };
       const isStageOneQualified = () => form.elements.qualifiedStage1?.value === 'Yes';
+      const isGenesisStudent = () => form.elements.genesisStudent?.value === 'Yes';
       const defaultSubmitLabel = () => isStageOneQualified() ? 'Complete Free Registration' : 'Register for GIMS 2026';
       const updateQualificationFee = () => {
         const qualified = isStageOneQualified();
+        const genesisStudent = isGenesisStudent();
         feeBox.classList.toggle('is-waived', qualified);
         feeIcon.textContent = qualified ? '✓' : '₹';
-        feeTitle.innerHTML = qualified ? 'Registration Fee: ₹0 <em>Waived</em>' : 'Registration Fee: ₹149 <em>Early Bird</em>';
-        feeNote.textContent = qualified ? 'Stage 1 qualified through school' : 'Regular fee: ₹199';
+        feeTitle.innerHTML = qualified ? 'Registration Fee: ₹0 <em>Waived</em>' : genesisStudent ? 'Registration Fee: ₹100 <em>Genesis Student</em>' : 'Registration Fee: ₹149 <em>Early Bird</em>';
+        feeNote.textContent = qualified ? 'Stage 1 qualified through school' : genesisStudent ? 'Special Genesis student fee' : 'Genesis students pay ₹100 · Regular fee: ₹199';
         payButton.textContent = defaultSubmitLabel();
       };
       qualifiedStageInputs.forEach((input) => input.addEventListener('change', updateQualificationFee));
+      genesisStudentInputs.forEach((input) => input.addEventListener('change', updateQualificationFee));
 
       const setLoading = (loading, label = defaultSubmitLabel()) => {
         payButton.disabled = loading;
@@ -542,6 +560,7 @@
           presentBoard: data.get('presentBoard'),
           testCenter: data.get('testCenter'),
           qualifiedStage1: data.get('qualifiedStage1'),
+          genesisStudent: data.get('genesisStudent'),
           registrationFee: '14900'
         };
 
