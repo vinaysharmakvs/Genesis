@@ -1,0 +1,1 @@
+.journey-section:has(#class-12:checked) .panel-11,.journey-section:has(#class-12:checked) .panel-dropper,.journey-section:has(#dropper:checked) .panel-11,.journey-section:has(#dropper:checked) .panel-12{display:none}.journey-section:has(#class-12:checked) .panel-12,.journey-section:has(#dropper:checked) .panel-dropper{display:grid}
