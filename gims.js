@@ -272,12 +272,12 @@
             const verifyResponse = await fetch("/api/scholarship/verify-payment", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ ...paymentResponse, registrationId: order.registrationId })
+              body: JSON.stringify({ ...paymentResponse, attemptId: order.attemptId })
             });
             const verified = await verifyResponse.json();
             if (!verifyResponse.ok) throw new Error(verified.error || "Payment verification failed.");
             emit("payment_success");
-            setState("success", `<h3>Registration successful</h3><p>Student: ${registrationPayload.studentName}</p><p>Reference: ${verified.registrationId || order.registrationId}</p><p>Payment ID: ${paymentResponse.razorpay_payment_id}</p><p>Amount paid: Rs 149</p><a class="button primary" href="index.html">Return to homepage</a>`);
+            setState("success", `<h3>Registration successful</h3><p>Student: ${registrationPayload.studentName}</p><p>Reference: ${verified.registrationId}</p><p>Payment ID: ${paymentResponse.razorpay_payment_id}</p><p>Amount paid: Rs 149</p><a class="button primary" href="index.html">Return to homepage</a>`);
           } catch (verifyError) {
             emit("payment_failed", { reason: "verification_failed" });
             setState("failed", `<h3>Payment verification failed</h3><p>${verifyError.message}</p><p>If money was deducted, please contact Genesis with your Razorpay payment ID.</p><a class="button primary" href="#register">Retry Payment</a>`);
