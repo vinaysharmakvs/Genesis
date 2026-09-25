@@ -4,6 +4,9 @@
   const loginMessage = document.querySelector('[data-login-message]');
   const dashboard = document.querySelector('[data-dashboard]');
   const rowsElement = document.querySelector('[data-registration-rows]');
+  const paymentAttemptRows = document.querySelector('[data-payment-attempt-rows]');
+  const attemptCount = document.querySelector('[data-attempt-count]');
+  const attemptEmptyState = document.querySelector('[data-attempt-empty-state]');
   const emptyState = document.querySelector('[data-empty-state]');
   const resultCount = document.querySelector('[data-result-count]');
   const syncNote = document.querySelector('[data-sync-note]');
@@ -15,6 +18,7 @@
   let registrations = [];
   let transactions = [];
   let events = [];
+  let paymentAttempts = [];
 
   const escapeHtml = (value) => String(value ?? '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -40,12 +44,14 @@
       registrations = Array.isArray(data.registrations) ? data.registrations : [];
       transactions = Array.isArray(data.transactions) ? data.transactions : [];
       events = Array.isArray(data.events) ? data.events : [];
+      paymentAttempts = Array.isArray(data.paymentAttempts) ? data.paymentAttempts : [];
       loginPanel.hidden = true;
       dashboard.hidden = false;
-      syncNote.textContent = `Updated ${formatDate(data.generatedAt)} · ${registrations.length} registrations · ${transactions.length} payment records · ${events.length} event records`;
+      syncNote.textContent = `Updated ${formatDate(data.generatedAt)} · ${registrations.length} confirmed registrations · ${paymentAttempts.length} unfinished payment attempts`;
       populateFilters();
       updateStats();
       renderRows();
+      renderPaymentAttempts();
     } catch (error) {
       loginMessage.textContent = error.message;
     } finally {
@@ -72,6 +78,7 @@
     const stats = {
       total: registrations.length,
       confirmed: registrations.filter((item) => item.registration_status === 'confirmed').length,
+      awaiting: paymentAttempts.length,
       qualified: registrations.filter((item) => item.qualified_stage_1 === true).length,
       paid: paidTransactions.length,
       revenue: money(revenue)
@@ -106,6 +113,20 @@
         <td><span class="status ${row.qualified_stage_1 ? 'success' : ''}">${row.qualified_stage_1 ? 'Yes' : 'No'}</span></td>
         <td><span class="status ${statusClass(row.payment_status)}">${display(row.payment_status).replaceAll('_', ' ')}</span><span class="cell-note">${money(row.fee_amount, row.currency)}</span></td>
         <td><button class="view-button" type="button" data-view="${escapeHtml(row.registration_id)}">View</button></td>
+      </tr>`).join('');
+  };
+
+  const renderPaymentAttempts = () => {
+    if (!paymentAttemptRows) return;
+    attemptCount.textContent = `${paymentAttempts.length} ${paymentAttempts.length === 1 ? 'attempt' : 'attempts'}`;
+    attemptEmptyState.hidden = paymentAttempts.length !== 0;
+    paymentAttemptRows.innerHTML = paymentAttempts.map((attempt) => `
+      <tr>
+        <td><span class="cell-title">Payment started</span><span class="cell-note">${formatDate(attempt.created_at)}</span></td>
+        <td><span class="cell-title">${display(attempt.student_name)}</span></td>
+        <td><span class="cell-title">${display(attempt.mobile)}</span><span class="cell-note">${display(attempt.email)}</span></td>
+        <td><span class="cell-title">${money(attempt.fee_amount, attempt.currency)}</span></td>
+        <td><span class="status warn">${display(attempt.payment_status).replaceAll('_', ' ')}</span></td>
       </tr>`).join('');
   };
 
@@ -146,7 +167,7 @@
   loginForm.addEventListener('submit', (event) => { event.preventDefault(); securityCode = loginForm.securityCode.value; loadDashboard(); });
   document.querySelector('[data-refresh]').addEventListener('click', loadDashboard);
   document.querySelector('[data-export]').addEventListener('click', exportCsv);
-  document.querySelector('[data-logout]').addEventListener('click', () => { securityCode = ''; registrations = []; transactions = []; events = []; dashboard.hidden = true; loginPanel.hidden = false; loginForm.reset(); loginForm.securityCode.focus(); });
+  document.querySelector('[data-logout]').addEventListener('click', () => { securityCode = ''; registrations = []; transactions = []; events = []; paymentAttempts = []; dashboard.hidden = true; loginPanel.hidden = false; loginForm.reset(); loginForm.securityCode.focus(); });
   document.querySelector('[data-dialog-close]').addEventListener('click', () => detailsDialog.close());
   detailsDialog.addEventListener('click', (event) => { if (event.target === detailsDialog) detailsDialog.close(); });
   rowsElement.addEventListener('click', (event) => { const button = event.target.closest('[data-view]'); if (button) showDetails(button.dataset.view); });
