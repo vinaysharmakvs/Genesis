@@ -540,6 +540,14 @@
         payButton.disabled = loading;
         payButton.textContent = loading ? label : defaultSubmitLabel();
       };
+      const recordPaymentEvent = (attemptId, eventType, reason = '') => {
+        if (!attemptId) return;
+        fetch('/api/scholarship/payment-event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ attemptId, eventType, reason })
+        }).catch(() => {});
+      };
 
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -560,14 +568,8 @@
           presentBoard: data.get('presentBoard'),
           testCenter: data.get('testCenter'),
           qualifiedStage1: data.get('qualifiedStage1'),
-          genesisStudent: data.get('genesisStudent'),
-          registrationFee: '14900'
+          genesisStudent: data.get('genesisStudent')
         };
-
-        if (payload.qualifiedStage1 !== 'Yes' && !window.Razorpay) {
-          showPaymentResult('failed', 'Secure payment is unavailable', 'Please check your internet connection and try again.');
-          return;
-        }
 
         setLoading(true, payload.qualifiedStage1 === 'Yes' ? 'Saving registration...' : 'Creating secure order...');
         try {
@@ -587,6 +589,16 @@
             return;
           }
 
+          if (order.resumed) {
+            message.textContent = 'Your earlier payment attempt was not completed. Please complete payment to confirm this registration.';
+          }
+          if (!window.Razorpay) {
+            recordPaymentEvent(order.attemptId, 'checkout_failed', 'Razorpay Checkout did not load');
+            showPaymentResult('failed', 'Secure payment is unavailable', 'Your registration is awaiting payment. Please check your internet connection and try again.');
+            setLoading(false);
+            return;
+          }
+
           const razorpay = new Razorpay({
             key: order.keyId,
             amount: order.amount,
@@ -602,23 +614,32 @@
                 const verifyResponse = await fetch('/api/scholarship/verify-payment', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ ...payment, registrationId: order.registrationId })
+                  body: JSON.stringify({ ...payment, attemptId: order.attemptId })
                 });
                 const verified = await verifyResponse.json();
                 if (!verifyResponse.ok) throw new Error(verified.error || 'Payment verification failed.');
                 showPaymentResult('success', 'Registration successful', `Thank you, ${payload.studentName}. Your GIMS registration is confirmed. Reference: ${verified.registrationId}.`);
               } catch (error) {
+                recordPaymentEvent(order.attemptId, 'payment_verification_failed', error.message);
                 showPaymentResult('failed', 'Payment verification failed', error.message);
               } finally {
                 setLoading(false);
               }
             },
-            modal: { ondismiss: () => setLoading(false) }
+            modal: {
+              ondismiss: () => {
+                recordPaymentEvent(order.attemptId, 'checkout_cancelled');
+                showPaymentResult('pending', 'Payment pending', 'Your registration has not been confirmed. You can complete payment whenever you are ready.');
+                setLoading(false);
+              }
+            }
           });
           razorpay.on('payment.failed', (response) => {
+            recordPaymentEvent(order.attemptId, 'checkout_failed', response.error?.description || 'Payment failed');
             showPaymentResult('failed', 'Payment failed', response.error?.description || 'The payment could not be completed.');
             setLoading(false);
           });
+          recordPaymentEvent(order.attemptId, 'checkout_opened');
           razorpay.open();
         } catch (error) {
           showPaymentResult('failed', 'Secure payment could not start', error.message);
