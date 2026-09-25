@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-const { markPaymentVerified } = require("../_lib/database");
+const { completePaymentAttempt } = require("../_lib/database");
 
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 
@@ -40,7 +40,7 @@ module.exports = async (request, response) => {
 
   try {
     const data = await readJsonBody(request);
-    const required = ["razorpay_order_id", "razorpay_payment_id", "razorpay_signature", "registrationId"];
+    const required = ["razorpay_order_id", "razorpay_payment_id", "razorpay_signature", "attemptId"];
     for (const key of required) {
       if (!data[key]) return sendJson(response, 400, { error: `Missing ${key}` });
     }
@@ -49,14 +49,19 @@ module.exports = async (request, response) => {
       return sendJson(response, 400, { error: "Payment signature verification failed." });
     }
 
-    const database = await markPaymentVerified({
-      registrationId: data.registrationId,
+    const registrationId = `GIMS-${new Date().getFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+    const database = await completePaymentAttempt({
+      attemptId: data.attemptId,
+      registrationId,
       payment: data
     });
+    if (!database.saved) {
+      return sendJson(response, 409, { error: database.reason || "This payment has already been processed." });
+    }
 
     return sendJson(response, 200, {
       verified: true,
-      registrationId: data.registrationId,
+      registrationId: database.registrationId,
       paymentId: data.razorpay_payment_id,
       paymentStatus: "payment_verified",
       database
