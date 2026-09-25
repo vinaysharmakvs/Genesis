@@ -89,6 +89,25 @@ const ensureSchema = async () => {
     )
   `);
   await run(`
+    CREATE TABLE IF NOT EXISTS genesis.payment_attempts (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      attempt_id TEXT NOT NULL UNIQUE,
+      student_name TEXT NOT NULL,
+      mobile TEXT NOT NULL,
+      email TEXT NOT NULL,
+      registration_payload JSONB NOT NULL,
+      fee_amount INTEGER NOT NULL,
+      currency TEXT NOT NULL DEFAULT 'INR',
+      razorpay_order_id TEXT UNIQUE,
+      razorpay_payment_id TEXT,
+      razorpay_signature TEXT,
+      payment_status TEXT NOT NULL DEFAULT 'checkout_pending',
+      registration_id TEXT UNIQUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  await run(`
     CREATE TABLE IF NOT EXISTS genesis.payment_event_logs (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       registration_id TEXT,
@@ -100,14 +119,17 @@ const ensureSchema = async () => {
   await run("CREATE INDEX IF NOT EXISTS idx_genesis_users_mobile ON genesis.users(mobile)");
   await run("CREATE INDEX IF NOT EXISTS idx_genesis_registrations_email ON genesis.scholarship_registrations(email)");
   await run("CREATE INDEX IF NOT EXISTS idx_genesis_registrations_mobile ON genesis.scholarship_registrations(mobile)");
+  await run("CREATE INDEX IF NOT EXISTS idx_genesis_registrations_parent_student ON genesis.scholarship_registrations(mobile, lower(student_name))");
   await run("CREATE INDEX IF NOT EXISTS idx_genesis_registrations_payment_status ON genesis.scholarship_registrations(payment_status)");
   await run("CREATE INDEX IF NOT EXISTS idx_genesis_transactions_order ON genesis.payment_transactions(razorpay_order_id)");
   await run("CREATE INDEX IF NOT EXISTS idx_genesis_transactions_payment ON genesis.payment_transactions(razorpay_payment_id)");
+  await run("CREATE INDEX IF NOT EXISTS idx_genesis_payment_attempts_parent_student ON genesis.payment_attempts(mobile, lower(student_name))");
+  await run("CREATE INDEX IF NOT EXISTS idx_genesis_payment_attempts_status ON genesis.payment_attempts(payment_status)");
   schemaReady = true;
   return true;
 };
 
-const savePendingRegistration = async ({ registrationId, order, registration, amount, currency }) => {
+const savePendingRegistration = async ({ registrationId, order = null, registration, amount, currency }) => {
   if (!(await ensureSchema())) return { saved: false, reason: "DATABASE_URL not configured" };
 
   const userResult = await run(
@@ -137,7 +159,26 @@ const savePendingRegistration = async ({ registrationId, order, registration, am
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, 'payment_pending', 'payment_pending')
       ON CONFLICT (registration_id)
       DO UPDATE SET
-        razorpay_order_id = EXCLUDED.razorpay_order_id,
+        user_id = EXCLUDED.user_id,
+        student_name = EXCLUDED.student_name,
+        parent_name = EXCLUDED.parent_name,
+        grade = EXCLUDED.grade,
+        school_name = EXCLUDED.school_name,
+        city = EXCLUDED.city,
+        state = EXCLUDED.state,
+        mobile = EXCLUDED.mobile,
+        email = EXCLUDED.email,
+        test_mode = EXCLUDED.test_mode,
+        present_board = EXCLUDED.present_board,
+        test_center = EXCLUDED.test_center,
+        qualified_stage_1 = FALSE,
+        genesis_student = EXCLUDED.genesis_student,
+        fee_amount = EXCLUDED.fee_amount,
+        currency = EXCLUDED.currency,
+        razorpay_order_id = COALESCE(EXCLUDED.razorpay_order_id, genesis.scholarship_registrations.razorpay_order_id),
+        payment_status = 'payment_pending',
+        registration_status = 'payment_pending',
+        verified_at = NULL,
         updated_at = NOW()
     `,
     [
@@ -158,19 +199,25 @@ const savePendingRegistration = async ({ registrationId, order, registration, am
       registration.genesisStudent,
       amount / 100,
       currency,
-      order.id
+      order?.id || null
     ]
   );
 
-  await run(
-    `
-      INSERT INTO genesis.payment_transactions (
-        registration_id, razorpay_order_id, amount, currency, status, raw_payload
-      )
-      VALUES ($1, $2, $3, $4, 'order_created', $5::jsonb)
-    `,
-    [registrationId, order.id, amount, currency, JSON.stringify(order)]
-  );
+  if (order) {
+    await run(
+      `
+        INSERT INTO genesis.payment_transactions (
+          registration_id, razorpay_order_id, amount, currency, status, raw_payload
+        )
+        VALUES ($1, $2, $3, $4, 'order_created', $5::jsonb)
+        ON CONFLICT (razorpay_order_id) DO NOTHING
+      `,
+      [registrationId, order.id, amount, currency, JSON.stringify(order)]
+    );
+    await recordPaymentEvent({ registrationId, eventType: 'payment_order_created', payload: { orderId: order.id, amount, currency } });
+  } else {
+    await recordPaymentEvent({ registrationId, eventType: 'registration_intended', payload: { amount, currency } });
+  }
 
   return { saved: true };
 };
@@ -203,6 +250,27 @@ const saveQualifiedRegistration = async ({ registrationId, registration, currenc
         qualified_stage_1, genesis_student, fee_amount, currency, payment_status, registration_status, verified_at
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, TRUE, $14, 0, $15, 'not_required', 'confirmed', NOW())
+      ON CONFLICT (registration_id)
+      DO UPDATE SET
+        user_id = EXCLUDED.user_id,
+        student_name = EXCLUDED.student_name,
+        parent_name = EXCLUDED.parent_name,
+        grade = EXCLUDED.grade,
+        school_name = EXCLUDED.school_name,
+        city = EXCLUDED.city,
+        state = EXCLUDED.state,
+        mobile = EXCLUDED.mobile,
+        email = EXCLUDED.email,
+        test_mode = EXCLUDED.test_mode,
+        present_board = EXCLUDED.present_board,
+        test_center = EXCLUDED.test_center,
+        qualified_stage_1 = TRUE,
+        genesis_student = EXCLUDED.genesis_student,
+        fee_amount = 0,
+        payment_status = 'not_required',
+        registration_status = 'confirmed',
+        verified_at = NOW(),
+        updated_at = NOW()
     `,
     [
       registrationId,
@@ -223,6 +291,131 @@ const saveQualifiedRegistration = async ({ registrationId, registration, currenc
     ]
   );
 
+  await recordPaymentEvent({ registrationId, eventType: 'stage_1_registration_confirmed', payload: { amount: 0, currency } });
+
+  return { saved: true };
+};
+
+const savePaymentAttempt = async ({ attemptId, order = null, registration, amount, currency }) => {
+  if (!(await ensureSchema())) return { saved: false, reason: "DATABASE_URL not configured" };
+  await run(
+    `
+      INSERT INTO genesis.payment_attempts (
+        attempt_id, student_name, mobile, email, registration_payload, fee_amount, currency, razorpay_order_id, payment_status
+      )
+      VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, $8, 'checkout_pending')
+      ON CONFLICT (attempt_id)
+      DO UPDATE SET
+        student_name = EXCLUDED.student_name,
+        mobile = EXCLUDED.mobile,
+        email = EXCLUDED.email,
+        registration_payload = EXCLUDED.registration_payload,
+        fee_amount = EXCLUDED.fee_amount,
+        currency = EXCLUDED.currency,
+        razorpay_order_id = COALESCE(EXCLUDED.razorpay_order_id, genesis.payment_attempts.razorpay_order_id),
+        payment_status = 'checkout_pending',
+        updated_at = NOW()
+    `,
+    [attemptId, registration.studentName, registration.mobile, registration.email, JSON.stringify(registration), amount / 100, currency, order?.id || null]
+  );
+  await recordPaymentEvent({
+    registrationId: attemptId,
+    eventType: order ? "payment_order_created" : "payment_intended",
+    payload: order ? { orderId: order.id, amount, currency } : { amount, currency }
+  });
+  return { saved: true };
+};
+
+const findOpenPaymentAttempt = async ({ studentName, mobile, year = new Date().getFullYear() }) => {
+  if (!(await ensureSchema())) return null;
+  const result = await run(
+    `
+      SELECT attempt_id, fee_amount, currency, payment_status
+      FROM genesis.payment_attempts
+      WHERE mobile = $1
+        AND lower(trim(student_name)) = lower(trim($2))
+        AND payment_status <> 'payment_verified'
+        AND created_at >= make_date($3, 1, 1)
+      ORDER BY created_at DESC
+      LIMIT 1
+    `,
+    [mobile, studentName, year]
+  );
+  return result?.rows?.[0] || null;
+};
+
+const completePaymentAttempt = async ({ attemptId, payment, registrationId }) => {
+  if (!(await ensureSchema())) return { saved: false, reason: "DATABASE_URL not configured" };
+  const attemptResult = await run(
+    `
+      UPDATE genesis.payment_attempts
+      SET payment_status = 'payment_verified', razorpay_payment_id = $1, razorpay_signature = $2, registration_id = $3, updated_at = NOW()
+      WHERE attempt_id = $4
+        AND razorpay_order_id = $5
+        AND registration_id IS NULL
+      RETURNING registration_payload, fee_amount, currency, razorpay_order_id
+    `,
+    [payment.razorpay_payment_id, payment.razorpay_signature, registrationId, attemptId, payment.razorpay_order_id]
+  );
+  const attempt = attemptResult?.rows?.[0];
+  if (!attempt) return { saved: false, reason: "This payment has already been processed or does not match the payment attempt." };
+
+  const registration = attempt.registration_payload;
+  const userResult = await run(
+    `
+      INSERT INTO genesis.users (full_name, email, mobile, city, state)
+      VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT (email)
+      DO UPDATE SET full_name = EXCLUDED.full_name, mobile = EXCLUDED.mobile, city = EXCLUDED.city, state = EXCLUDED.state, updated_at = NOW()
+      RETURNING id
+    `,
+    [registration.parentName, registration.email, registration.mobile, registration.city, registration.state]
+  );
+  const userId = userResult.rows[0]?.id;
+
+  await run(
+    `
+      INSERT INTO genesis.scholarship_registrations (
+        registration_id, user_id, student_name, parent_name, grade, school_name, city, state, mobile, email,
+        test_mode, present_board, test_center, qualified_stage_1, genesis_student, fee_amount, currency,
+        razorpay_order_id, payment_status, registration_status, verified_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, FALSE, $14, $15, $16, $17, 'payment_verified', 'confirmed', NOW())
+    `,
+    [registrationId, userId, registration.studentName, registration.parentName, registration.grade, registration.schoolName, registration.city, registration.state, registration.mobile, registration.email, registration.testMode, registration.presentBoard, registration.testCenter, registration.genesisStudent, attempt.fee_amount, attempt.currency, attempt.razorpay_order_id]
+  );
+  await run(
+    `INSERT INTO genesis.payment_transactions (registration_id, razorpay_order_id, razorpay_payment_id, razorpay_signature, amount, currency, status, raw_payload)
+     VALUES ($1, $2, $3, $4, $5, $6, 'payment_verified', $7::jsonb)`,
+    [registrationId, attempt.razorpay_order_id, payment.razorpay_payment_id, payment.razorpay_signature, attempt.fee_amount * 100, attempt.currency, JSON.stringify(payment)]
+  );
+  await recordPaymentEvent({ registrationId: registrationId, eventType: "payment_verified", payload: { attemptId, paymentId: payment.razorpay_payment_id } });
+  return { saved: true, registrationId };
+};
+
+const findExistingRegistration = async ({ studentName, mobile, year = new Date().getFullYear() }) => {
+  if (!(await ensureSchema())) return null;
+  const result = await run(
+    `
+      SELECT registration_id, fee_amount, currency, payment_status, registration_status
+      FROM genesis.scholarship_registrations
+      WHERE mobile = $1
+        AND lower(trim(student_name)) = lower(trim($2))
+        AND registration_id LIKE $3
+      ORDER BY created_at DESC
+      LIMIT 1
+    `,
+    [mobile, studentName, `GIMS-${year}-%`]
+  );
+  return result?.rows?.[0] || null;
+};
+
+const recordPaymentEvent = async ({ registrationId, eventType, payload = {} }) => {
+  if (!(await ensureSchema())) return { saved: false, reason: "DATABASE_URL not configured" };
+  await run(
+    `INSERT INTO genesis.payment_event_logs (registration_id, event_type, payload) VALUES ($1, $2, $3::jsonb)`,
+    [registrationId, eventType, JSON.stringify(payload)]
+  );
   return { saved: true };
 };
 
@@ -277,7 +470,7 @@ const markPaymentVerified = async ({ registrationId, payment }) => {
 const getGimsDashboard = async () => {
   if (!(await ensureSchema())) return null;
 
-  const [registrationsResult, transactionsResult, eventsResult] = await Promise.all([
+  const [registrationsResult, transactionsResult, eventsResult, attemptsResult] = await Promise.all([
     run(`
       SELECT
         r.registration_id,
@@ -313,6 +506,7 @@ const getGimsDashboard = async () => {
         u.created_at AS user_created_at
       FROM genesis.scholarship_registrations r
       LEFT JOIN genesis.users u ON u.id = r.user_id
+      WHERE r.registration_status = 'confirmed'
       ORDER BY r.created_at DESC
       LIMIT 2000
     `),
@@ -341,20 +535,31 @@ const getGimsDashboard = async () => {
       FROM genesis.payment_event_logs
       ORDER BY created_at DESC
       LIMIT 5000
+    `),
+    run(`
+      SELECT student_name, mobile, email, fee_amount, currency, payment_status, created_at, updated_at
+      FROM genesis.payment_attempts
+      WHERE payment_status <> 'payment_verified'
+      ORDER BY created_at DESC
+      LIMIT 2000
     `)
   ]);
 
   return {
     registrations: registrationsResult.rows,
     transactions: transactionsResult.rows,
-    events: eventsResult.rows
+    events: eventsResult.rows,
+    paymentAttempts: attemptsResult.rows
   };
 };
 
 module.exports = {
   ensureSchema,
-  savePendingRegistration,
   saveQualifiedRegistration,
-  markPaymentVerified,
+  savePaymentAttempt,
+  findOpenPaymentAttempt,
+  completePaymentAttempt,
+  findExistingRegistration,
+  recordPaymentEvent,
   getGimsDashboard
 };
