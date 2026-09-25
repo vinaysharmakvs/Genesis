@@ -1,176 +1,593 @@
-(() => {
-  const loginPanel = document.querySelector('[data-login-panel]');
-  const loginForm = document.querySelector('[data-login-form]');
-  const loginMessage = document.querySelector('[data-login-message]');
-  const dashboard = document.querySelector('[data-dashboard]');
-  const rowsElement = document.querySelector('[data-registration-rows]');
-  const paymentAttemptRows = document.querySelector('[data-payment-attempt-rows]');
-  const attemptCount = document.querySelector('[data-attempt-count]');
-  const attemptEmptyState = document.querySelector('[data-attempt-empty-state]');
-  const emptyState = document.querySelector('[data-empty-state]');
-  const resultCount = document.querySelector('[data-result-count]');
-  const syncNote = document.querySelector('[data-sync-note]');
-  const searchInput = document.querySelector('[data-search]');
-  const filterElements = [...document.querySelectorAll('[data-filter]')];
-  const detailsDialog = document.querySelector('[data-details-dialog]');
-  const detailsContent = document.querySelector('[data-details-content]');
-  let securityCode = '';
-  let registrations = [];
-  let transactions = [];
-  let events = [];
-  let paymentAttempts = [];
+let pool;
+let schemaReady = false;
 
-  const escapeHtml = (value) => String(value ?? '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-  const display = (value, fallback = '—') => value === null || value === undefined || value === '' ? fallback : escapeHtml(value);
-  const formatDate = (value) => value ? new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : '—';
-  const money = (amount, currency = 'INR') => new Intl.NumberFormat('en-IN', { style: 'currency', currency, maximumFractionDigits: 0 }).format(Number(amount || 0));
-  const statusClass = (value) => /verified|confirmed|not_required/i.test(value || '') ? 'success' : /pending|created/i.test(value || '') ? 'warn' : '';
+const getConnectionString = () => process.env.DATABASE_URL || process.env.POSTGRES_URL;
 
-  const loadDashboard = async () => {
-    loginMessage.textContent = '';
-    const submitButton = loginForm.querySelector('button');
-    submitButton.disabled = true;
-    submitButton.textContent = 'Loading…';
-    try {
-      const response = await fetch('/api/admin/gims-dashboard', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: securityCode })
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Unable to load dashboard.');
-      registrations = Array.isArray(data.registrations) ? data.registrations : [];
-      transactions = Array.isArray(data.transactions) ? data.transactions : [];
-      events = Array.isArray(data.events) ? data.events : [];
-      paymentAttempts = Array.isArray(data.paymentAttempts) ? data.paymentAttempts : [];
-      loginPanel.hidden = true;
-      dashboard.hidden = false;
-      syncNote.textContent = `Updated ${formatDate(data.generatedAt)} · ${registrations.length} confirmed registrations · ${paymentAttempts.length} unfinished payment attempts`;
-      populateFilters();
-      updateStats();
-      renderRows();
-      renderPaymentAttempts();
-    } catch (error) {
-      loginMessage.textContent = error.message;
-    } finally {
-      submitButton.disabled = false;
-      submitButton.textContent = 'Open Dashboard';
-    }
-  };
-
-  const populateFilters = () => {
-    filterElements.forEach((select) => {
-      const key = select.dataset.filter;
-      if (key === 'qualified_stage_1') return;
-      const current = select.value;
-      const first = select.options[0];
-      const values = [...new Set(registrations.map((row) => row[key]).filter(Boolean))].sort();
-      select.replaceChildren(first, ...values.map((value) => new Option(value.replaceAll('_', ' '), value)));
-      select.value = current;
+const getPool = () => {
+  const connectionString = getConnectionString();
+  if (!connectionString) return null;
+  if (!pool) {
+    const { Pool } = require("pg");
+    pool = new Pool({
+      connectionString,
+      ssl: connectionString.includes("localhost") ? false : { rejectUnauthorized: false }
     });
-  };
+  }
+  return pool;
+};
 
-  const updateStats = () => {
-    const paidTransactions = transactions.filter((item) => item.status === 'payment_verified');
-    const revenue = paidTransactions.reduce((sum, item) => sum + Number(item.amount || 0), 0) / 100;
-    const stats = {
-      total: registrations.length,
-      confirmed: registrations.filter((item) => item.registration_status === 'confirmed').length,
-      awaiting: paymentAttempts.length,
-      qualified: registrations.filter((item) => item.qualified_stage_1 === true).length,
-      paid: paidTransactions.length,
-      revenue: money(revenue)
-    };
-    Object.entries(stats).forEach(([key, value]) => { document.querySelector(`[data-stat="${key}"]`).textContent = value; });
-  };
+const run = async (query, params = []) => {
+  const database = getPool();
+  if (!database) return null;
+  return database.query(query, params);
+};
 
-  const filteredRegistrations = () => {
-    const query = searchInput.value.trim().toLowerCase();
-    return registrations.filter((row) => {
-      const searchText = [row.registration_id, row.student_name, row.parent_name, row.mobile, row.email, row.school_name, row.city, row.state].join(' ').toLowerCase();
-      if (query && !searchText.includes(query)) return false;
-      return filterElements.every((select) => {
-        if (!select.value) return true;
-        if (select.dataset.filter === 'qualified_stage_1') return String(row.qualified_stage_1) === select.value;
-        return String(row[select.dataset.filter] || '') === select.value;
-      });
-    });
-  };
+const ensureSchema = async () => {
+  if (schemaReady || !getConnectionString()) return Boolean(getConnectionString());
 
-  const renderRows = () => {
-    const filtered = filteredRegistrations();
-    resultCount.textContent = `${filtered.length} ${filtered.length === 1 ? 'record' : 'records'}`;
-    emptyState.hidden = filtered.length !== 0;
-    rowsElement.innerHTML = filtered.map((row) => `
-      <tr>
-        <td><span class="cell-title">${display(row.registration_id)}</span><span class="cell-note">${formatDate(row.created_at)}</span></td>
-        <td><span class="cell-title">${display(row.student_name)}</span><span class="cell-note">${display(row.grade)}</span></td>
-        <td><span class="cell-title">${display(row.parent_name)}</span><span class="cell-note">${display(row.mobile)} · ${display(row.email)}</span></td>
-        <td><span class="cell-title">${display(row.school_name)}</span><span class="cell-note">${display(row.present_board)} · ${display(row.city)}</span></td>
-        <td><span class="cell-title">${display(row.test_center)}</span><span class="cell-note">${display(row.test_mode)}</span></td>
-        <td><span class="status ${row.qualified_stage_1 ? 'success' : ''}">${row.qualified_stage_1 ? 'Yes' : 'No'}</span></td>
-        <td><span class="status ${statusClass(row.payment_status)}">${display(row.payment_status).replaceAll('_', ' ')}</span><span class="cell-note">${money(row.fee_amount, row.currency)}</span></td>
-        <td><button class="view-button" type="button" data-view="${escapeHtml(row.registration_id)}">View</button></td>
-      </tr>`).join('');
-  };
+  await run("CREATE SCHEMA IF NOT EXISTS genesis");
+  await run("CREATE EXTENSION IF NOT EXISTS pgcrypto");
+  await run(`
+    CREATE TABLE IF NOT EXISTS genesis.users (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      full_name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      mobile TEXT NOT NULL,
+      city TEXT,
+      state TEXT,
+      role TEXT NOT NULL DEFAULT 'parent',
+      source TEXT NOT NULL DEFAULT 'gims_scholarship',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  await run(`
+    CREATE TABLE IF NOT EXISTS genesis.scholarship_registrations (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      registration_id TEXT NOT NULL UNIQUE,
+      user_id UUID REFERENCES genesis.users(id) ON DELETE SET NULL,
+      student_name TEXT NOT NULL,
+      parent_name TEXT NOT NULL,
+      grade TEXT NOT NULL,
+      school_name TEXT NOT NULL,
+      city TEXT NOT NULL,
+      state TEXT NOT NULL,
+      mobile TEXT NOT NULL,
+      email TEXT NOT NULL,
+      test_mode TEXT NOT NULL,
+      present_board TEXT,
+      test_center TEXT,
+      qualified_stage_1 BOOLEAN NOT NULL DEFAULT FALSE,
+      genesis_student BOOLEAN NOT NULL DEFAULT FALSE,
+      fee_amount INTEGER NOT NULL,
+      currency TEXT NOT NULL DEFAULT 'INR',
+      razorpay_order_id TEXT UNIQUE,
+      payment_status TEXT NOT NULL DEFAULT 'payment_pending',
+      registration_status TEXT NOT NULL DEFAULT 'payment_pending',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      verified_at TIMESTAMPTZ,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS present_board TEXT");
+  await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS test_center TEXT");
+  await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS qualified_stage_1 BOOLEAN NOT NULL DEFAULT FALSE");
+  await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS genesis_student BOOLEAN NOT NULL DEFAULT FALSE");
+  await run(`
+    CREATE TABLE IF NOT EXISTS genesis.payment_transactions (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      registration_id TEXT NOT NULL REFERENCES genesis.scholarship_registrations(registration_id) ON DELETE CASCADE,
+      razorpay_order_id TEXT NOT NULL,
+      razorpay_payment_id TEXT,
+      razorpay_signature TEXT,
+      amount INTEGER NOT NULL,
+      currency TEXT NOT NULL DEFAULT 'INR',
+      status TEXT NOT NULL DEFAULT 'created',
+      raw_payload JSONB,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  await run(`
+    CREATE TABLE IF NOT EXISTS genesis.payment_attempts (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      attempt_id TEXT NOT NULL UNIQUE,
+      student_name TEXT NOT NULL,
+      mobile TEXT NOT NULL,
+      email TEXT NOT NULL,
+      registration_payload JSONB NOT NULL,
+      fee_amount INTEGER NOT NULL,
+      currency TEXT NOT NULL DEFAULT 'INR',
+      razorpay_order_id TEXT UNIQUE,
+      razorpay_payment_id TEXT,
+      razorpay_signature TEXT,
+      payment_status TEXT NOT NULL DEFAULT 'checkout_pending',
+      registration_id TEXT UNIQUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  await run(`
+    CREATE TABLE IF NOT EXISTS genesis.payment_event_logs (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      registration_id TEXT,
+      event_type TEXT NOT NULL,
+      payload JSONB,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  await run("CREATE INDEX IF NOT EXISTS idx_genesis_users_mobile ON genesis.users(mobile)");
+  await run("CREATE INDEX IF NOT EXISTS idx_genesis_registrations_email ON genesis.scholarship_registrations(email)");
+  await run("CREATE INDEX IF NOT EXISTS idx_genesis_registrations_mobile ON genesis.scholarship_registrations(mobile)");
+  await run("CREATE INDEX IF NOT EXISTS idx_genesis_registrations_parent_student ON genesis.scholarship_registrations(mobile, lower(student_name))");
+  await run("CREATE INDEX IF NOT EXISTS idx_genesis_registrations_payment_status ON genesis.scholarship_registrations(payment_status)");
+  await run("CREATE INDEX IF NOT EXISTS idx_genesis_transactions_order ON genesis.payment_transactions(razorpay_order_id)");
+  await run("CREATE INDEX IF NOT EXISTS idx_genesis_transactions_payment ON genesis.payment_transactions(razorpay_payment_id)");
+  await run("CREATE INDEX IF NOT EXISTS idx_genesis_payment_attempts_parent_student ON genesis.payment_attempts(mobile, lower(student_name))");
+  await run("CREATE INDEX IF NOT EXISTS idx_genesis_payment_attempts_status ON genesis.payment_attempts(payment_status)");
+  schemaReady = true;
+  return true;
+};
 
-  const renderPaymentAttempts = () => {
-    if (!paymentAttemptRows) return;
-    attemptCount.textContent = `${paymentAttempts.length} ${paymentAttempts.length === 1 ? 'attempt' : 'attempts'}`;
-    attemptEmptyState.hidden = paymentAttempts.length !== 0;
-    paymentAttemptRows.innerHTML = paymentAttempts.map((attempt) => `
-      <tr>
-        <td><span class="cell-title">${attempt.source === 'earlier_pending_registration' ? 'Earlier registration' : 'Payment started'}</span><span class="cell-note">${formatDate(attempt.created_at)}</span></td>
-        <td><span class="cell-title">${display(attempt.student_name)}</span></td>
-        <td><span class="cell-title">${display(attempt.mobile)}</span><span class="cell-note">${display(attempt.email)}</span></td>
-        <td><span class="cell-title">${money(attempt.fee_amount, attempt.currency)}</span></td>
-        <td><span class="status warn">${display(attempt.payment_status).replaceAll('_', ' ')}</span></td>
-      </tr>`).join('');
-  };
+const savePendingRegistration = async ({ registrationId, order = null, registration, amount, currency }) => {
+  if (!(await ensureSchema())) return { saved: false, reason: "DATABASE_URL not configured" };
 
-  const detailItem = (label, value) => `<div class="detail-item"><span>${escapeHtml(label)}</span><strong>${display(value)}</strong></div>`;
-  const showDetails = (registrationId) => {
-    const row = registrations.find((item) => item.registration_id === registrationId);
-    if (!row) return;
-    const paymentRows = transactions.filter((item) => item.registration_id === registrationId);
-    const eventRows = events.filter((item) => item.registration_id === registrationId);
-    detailsContent.innerHTML = `
-      <div class="detail-hero"><p class="eyebrow">${display(row.registration_id)}</p><h2>${display(row.student_name)}</h2><p>Registered ${formatDate(row.created_at)}</p></div>
-      <div class="detail-body">
-        <div class="detail-grid">
-          ${detailItem('Parent / guardian', row.parent_name)}${detailItem('Mobile', row.mobile)}${detailItem('Email', row.email)}
-          ${detailItem('Class', row.grade)}${detailItem('Present board', row.present_board)}${detailItem('School', row.school_name)}
-          ${detailItem('City', row.city)}${detailItem('State', row.state)}${detailItem('Test center', row.test_center)}
-          ${detailItem('Exam mode', row.test_mode)}${detailItem('Genesis student', row.genesis_student ? 'Yes' : 'No')}${detailItem('Stage 1 through school', row.qualified_stage_1 ? 'Yes' : 'No')}${detailItem('Registration fee', money(row.fee_amount, row.currency))}
-          ${detailItem('Registration status', String(row.registration_status || '').replaceAll('_', ' '))}${detailItem('Payment status', String(row.payment_status || '').replaceAll('_', ' '))}${detailItem('Verified', formatDate(row.verified_at))}
-          ${detailItem('Razorpay order ID', row.razorpay_order_id)}${detailItem('User ID', row.user_id)}${detailItem('User source', row.user_source)}
-        </div>
-        <section class="detail-section"><h3>Payment transactions</h3><div class="history-list">${paymentRows.length ? paymentRows.map((item) => `<div class="history-item"><div><strong>${display(item.status).replaceAll('_', ' ')}</strong><small>${display(item.razorpay_payment_id, 'No payment ID')}</small></div><div><strong>${money(Number(item.amount || 0) / 100, item.currency)}</strong><small>${formatDate(item.created_at)}</small></div><code>Order: ${display(item.razorpay_order_id)}</code></div>`).join('') : '<p class="detail-empty">No payment transaction required or recorded.</p>'}</div></section>
-        <section class="detail-section"><h3>Payment event log</h3><div class="history-list">${eventRows.length ? eventRows.map((item) => `<div class="history-item"><div><strong>${display(item.event_type).replaceAll('_', ' ')}</strong><small>${formatDate(item.created_at)}</small></div><code>${escapeHtml(JSON.stringify(item.payload, null, 2))}</code></div>`).join('') : '<p class="detail-empty">No payment events recorded.</p>'}</div></section>
-      </div>`;
-    detailsDialog.showModal();
-  };
+  const userResult = await run(
+    `
+      INSERT INTO genesis.users (full_name, email, mobile, city, state)
+      VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT (email)
+      DO UPDATE SET
+        full_name = EXCLUDED.full_name,
+        mobile = EXCLUDED.mobile,
+        city = EXCLUDED.city,
+        state = EXCLUDED.state,
+        updated_at = NOW()
+      RETURNING id
+    `,
+    [registration.parentName, registration.email, registration.mobile, registration.city, registration.state]
+  );
+  const userId = userResult.rows[0]?.id;
 
-  const exportCsv = () => {
-    const fields = ['registration_id','student_name','parent_name','mobile','email','grade','school_name','present_board','city','state','test_center','test_mode','genesis_student','qualified_stage_1','fee_amount','currency','payment_status','registration_status','razorpay_order_id','created_at','verified_at'];
-    const quote = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
-    const csv = [fields.join(','), ...filteredRegistrations().map((row) => fields.map((field) => quote(row[field])).join(','))].join('\n');
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-    link.download = `gims-registrations-${new Date().toISOString().slice(0, 10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(link.href);
-  };
+  await run(
+    `
+      INSERT INTO genesis.scholarship_registrations (
+        registration_id, user_id, student_name, parent_name, grade, school_name,
+        city, state, mobile, email, test_mode, present_board, test_center, qualified_stage_1, genesis_student, fee_amount, currency,
+        razorpay_order_id, payment_status, registration_status
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, 'payment_pending', 'payment_pending')
+      ON CONFLICT (registration_id)
+      DO UPDATE SET
+        user_id = EXCLUDED.user_id,
+        student_name = EXCLUDED.student_name,
+        parent_name = EXCLUDED.parent_name,
+        grade = EXCLUDED.grade,
+        school_name = EXCLUDED.school_name,
+        city = EXCLUDED.city,
+        state = EXCLUDED.state,
+        mobile = EXCLUDED.mobile,
+        email = EXCLUDED.email,
+        test_mode = EXCLUDED.test_mode,
+        present_board = EXCLUDED.present_board,
+        test_center = EXCLUDED.test_center,
+        qualified_stage_1 = FALSE,
+        genesis_student = EXCLUDED.genesis_student,
+        fee_amount = EXCLUDED.fee_amount,
+        currency = EXCLUDED.currency,
+        razorpay_order_id = COALESCE(EXCLUDED.razorpay_order_id, genesis.scholarship_registrations.razorpay_order_id),
+        payment_status = 'payment_pending',
+        registration_status = 'payment_pending',
+        verified_at = NULL,
+        updated_at = NOW()
+    `,
+    [
+      registrationId,
+      userId,
+      registration.studentName,
+      registration.parentName,
+      registration.grade,
+      registration.schoolName,
+      registration.city,
+      registration.state,
+      registration.mobile,
+      registration.email,
+      registration.testMode,
+      registration.presentBoard,
+      registration.testCenter,
+      false,
+      registration.genesisStudent,
+      amount / 100,
+      currency,
+      order?.id || null
+    ]
+  );
 
-  loginForm.addEventListener('submit', (event) => { event.preventDefault(); securityCode = loginForm.securityCode.value; loadDashboard(); });
-  document.querySelector('[data-refresh]').addEventListener('click', loadDashboard);
-  document.querySelector('[data-export]').addEventListener('click', exportCsv);
-  document.querySelector('[data-logout]').addEventListener('click', () => { securityCode = ''; registrations = []; transactions = []; events = []; paymentAttempts = []; dashboard.hidden = true; loginPanel.hidden = false; loginForm.reset(); loginForm.securityCode.focus(); });
-  document.querySelector('[data-dialog-close]').addEventListener('click', () => detailsDialog.close());
-  detailsDialog.addEventListener('click', (event) => { if (event.target === detailsDialog) detailsDialog.close(); });
-  rowsElement.addEventListener('click', (event) => { const button = event.target.closest('[data-view]'); if (button) showDetails(button.dataset.view); });
-  searchInput.addEventListener('input', renderRows);
-  filterElements.forEach((select) => select.addEventListener('change', renderRows));
-})();
+  if (order) {
+    await run(
+      `
+        INSERT INTO genesis.payment_transactions (
+          registration_id, razorpay_order_id, amount, currency, status, raw_payload
+        )
+        VALUES ($1, $2, $3, $4, 'order_created', $5::jsonb)
+        ON CONFLICT (razorpay_order_id) DO NOTHING
+      `,
+      [registrationId, order.id, amount, currency, JSON.stringify(order)]
+    );
+    await recordPaymentEvent({ registrationId, eventType: 'payment_order_created', payload: { orderId: order.id, amount, currency } });
+  } else {
+    await recordPaymentEvent({ registrationId, eventType: 'registration_intended', payload: { amount, currency } });
+  }
+
+  return { saved: true };
+};
+
+const saveQualifiedRegistration = async ({ registrationId, registration, currency }) => {
+  if (!(await ensureSchema())) return { saved: false, reason: "DATABASE_URL not configured" };
+
+  const userResult = await run(
+    `
+      INSERT INTO genesis.users (full_name, email, mobile, city, state)
+      VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT (email)
+      DO UPDATE SET
+        full_name = EXCLUDED.full_name,
+        mobile = EXCLUDED.mobile,
+        city = EXCLUDED.city,
+        state = EXCLUDED.state,
+        updated_at = NOW()
+      RETURNING id
+    `,
+    [registration.parentName, registration.email, registration.mobile, registration.city, registration.state]
+  );
+  const userId = userResult.rows[0]?.id;
+
+  await run(
+    `
+      INSERT INTO genesis.scholarship_registrations (
+        registration_id, user_id, student_name, parent_name, grade, school_name,
+        city, state, mobile, email, test_mode, present_board, test_center,
+        qualified_stage_1, genesis_student, fee_amount, currency, payment_status, registration_status, verified_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, TRUE, $14, 0, $15, 'not_required', 'confirmed', NOW())
+      ON CONFLICT (registration_id)
+      DO UPDATE SET
+        user_id = EXCLUDED.user_id,
+        student_name = EXCLUDED.student_name,
+        parent_name = EXCLUDED.parent_name,
+        grade = EXCLUDED.grade,
+        school_name = EXCLUDED.school_name,
+        city = EXCLUDED.city,
+        state = EXCLUDED.state,
+        mobile = EXCLUDED.mobile,
+        email = EXCLUDED.email,
+        test_mode = EXCLUDED.test_mode,
+        present_board = EXCLUDED.present_board,
+        test_center = EXCLUDED.test_center,
+        qualified_stage_1 = TRUE,
+        genesis_student = EXCLUDED.genesis_student,
+        fee_amount = 0,
+        payment_status = 'not_required',
+        registration_status = 'confirmed',
+        verified_at = NOW(),
+        updated_at = NOW()
+    `,
+    [
+      registrationId,
+      userId,
+      registration.studentName,
+      registration.parentName,
+      registration.grade,
+      registration.schoolName,
+      registration.city,
+      registration.state,
+      registration.mobile,
+      registration.email,
+      registration.testMode,
+      registration.presentBoard,
+      registration.testCenter,
+      registration.genesisStudent,
+      currency
+    ]
+  );
+
+  await recordPaymentEvent({ registrationId, eventType: 'stage_1_registration_confirmed', payload: { amount: 0, currency } });
+
+  return { saved: true };
+};
+
+const savePaymentAttempt = async ({ attemptId, order = null, registration, amount, currency }) => {
+  if (!(await ensureSchema())) return { saved: false, reason: "DATABASE_URL not configured" };
+  await run(
+    `
+      INSERT INTO genesis.payment_attempts (
+        attempt_id, student_name, mobile, email, registration_payload, fee_amount, currency, razorpay_order_id, payment_status
+      )
+      VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, $8, 'checkout_pending')
+      ON CONFLICT (attempt_id)
+      DO UPDATE SET
+        student_name = EXCLUDED.student_name,
+        mobile = EXCLUDED.mobile,
+        email = EXCLUDED.email,
+        registration_payload = EXCLUDED.registration_payload,
+        fee_amount = EXCLUDED.fee_amount,
+        currency = EXCLUDED.currency,
+        razorpay_order_id = COALESCE(EXCLUDED.razorpay_order_id, genesis.payment_attempts.razorpay_order_id),
+        payment_status = 'checkout_pending',
+        updated_at = NOW()
+    `,
+    [attemptId, registration.studentName, registration.mobile, registration.email, JSON.stringify(registration), amount / 100, currency, order?.id || null]
+  );
+  await recordPaymentEvent({
+    registrationId: attemptId,
+    eventType: order ? "payment_order_created" : "payment_intended",
+    payload: order ? { orderId: order.id, amount, currency } : { amount, currency }
+  });
+  return { saved: true };
+};
+
+const findOpenPaymentAttempt = async ({ studentName, mobile, year = new Date().getFullYear() }) => {
+  if (!(await ensureSchema())) return null;
+  const result = await run(
+    `
+      SELECT attempt_id, fee_amount, currency, payment_status
+      FROM genesis.payment_attempts
+      WHERE mobile = $1
+        AND lower(trim(student_name)) = lower(trim($2))
+        AND payment_status <> 'payment_verified'
+        AND created_at >= make_date($3, 1, 1)
+      ORDER BY created_at DESC
+      LIMIT 1
+    `,
+    [mobile, studentName, year]
+  );
+  return result?.rows?.[0] || null;
+};
+
+const completePaymentAttempt = async ({ attemptId, payment, registrationId }) => {
+  if (!(await ensureSchema())) return { saved: false, reason: "DATABASE_URL not configured" };
+  const attemptResult = await run(
+    `
+      UPDATE genesis.payment_attempts
+      SET payment_status = 'payment_verified', razorpay_payment_id = $1, razorpay_signature = $2, registration_id = $3, updated_at = NOW()
+      WHERE attempt_id = $4
+        AND razorpay_order_id = $5
+        AND registration_id IS NULL
+      RETURNING registration_payload, fee_amount, currency, razorpay_order_id
+    `,
+    [payment.razorpay_payment_id, payment.razorpay_signature, registrationId, attemptId, payment.razorpay_order_id]
+  );
+  const attempt = attemptResult?.rows?.[0];
+  if (!attempt) return { saved: false, reason: "This payment has already been processed or does not match the payment attempt." };
+
+  const registration = attempt.registration_payload;
+  const userResult = await run(
+    `
+      INSERT INTO genesis.users (full_name, email, mobile, city, state)
+      VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT (email)
+      DO UPDATE SET full_name = EXCLUDED.full_name, mobile = EXCLUDED.mobile, city = EXCLUDED.city, state = EXCLUDED.state, updated_at = NOW()
+      RETURNING id
+    `,
+    [registration.parentName, registration.email, registration.mobile, registration.city, registration.state]
+  );
+  const userId = userResult.rows[0]?.id;
+
+  await run(
+    `
+      INSERT INTO genesis.scholarship_registrations (
+        registration_id, user_id, student_name, parent_name, grade, school_name, city, state, mobile, email,
+        test_mode, present_board, test_center, qualified_stage_1, genesis_student, fee_amount, currency,
+        razorpay_order_id, payment_status, registration_status, verified_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, FALSE, $14, $15, $16, $17, 'payment_verified', 'confirmed', NOW())
+    `,
+    [registrationId, userId, registration.studentName, registration.parentName, registration.grade, registration.schoolName, registration.city, registration.state, registration.mobile, registration.email, registration.testMode, registration.presentBoard, registration.testCenter, registration.genesisStudent, attempt.fee_amount, attempt.currency, attempt.razorpay_order_id]
+  );
+  await run(
+    `INSERT INTO genesis.payment_transactions (registration_id, razorpay_order_id, razorpay_payment_id, razorpay_signature, amount, currency, status, raw_payload)
+     VALUES ($1, $2, $3, $4, $5, $6, 'payment_verified', $7::jsonb)`,
+    [registrationId, attempt.razorpay_order_id, payment.razorpay_payment_id, payment.razorpay_signature, attempt.fee_amount * 100, attempt.currency, JSON.stringify(payment)]
+  );
+  await recordPaymentEvent({ registrationId: registrationId, eventType: "payment_verified", payload: { attemptId, paymentId: payment.razorpay_payment_id } });
+  return { saved: true, registrationId };
+};
+
+const findExistingRegistration = async ({ studentName, mobile, year = new Date().getFullYear() }) => {
+  if (!(await ensureSchema())) return null;
+  const result = await run(
+    `
+      SELECT registration_id, fee_amount, currency, payment_status, registration_status
+      FROM genesis.scholarship_registrations
+      WHERE mobile = $1
+        AND lower(trim(student_name)) = lower(trim($2))
+        AND registration_id LIKE $3
+      ORDER BY created_at DESC
+      LIMIT 1
+    `,
+    [mobile, studentName, `GIMS-${year}-%`]
+  );
+  return result?.rows?.[0] || null;
+};
+
+const recordPaymentEvent = async ({ registrationId, eventType, payload = {} }) => {
+  if (!(await ensureSchema())) return { saved: false, reason: "DATABASE_URL not configured" };
+  await run(
+    `INSERT INTO genesis.payment_event_logs (registration_id, event_type, payload) VALUES ($1, $2, $3::jsonb)`,
+    [registrationId, eventType, JSON.stringify(payload)]
+  );
+  return { saved: true };
+};
+
+const markPaymentVerified = async ({ registrationId, payment }) => {
+  if (!(await ensureSchema())) return { saved: false, reason: "DATABASE_URL not configured" };
+
+  await run(
+    `
+      UPDATE genesis.scholarship_registrations
+      SET
+        payment_status = 'payment_verified',
+        registration_status = 'confirmed',
+        verified_at = NOW(),
+        updated_at = NOW()
+      WHERE registration_id = $1
+    `,
+    [registrationId]
+  );
+
+  await run(
+    `
+      UPDATE genesis.payment_transactions
+      SET
+        razorpay_payment_id = $1,
+        razorpay_signature = $2,
+        status = 'payment_verified',
+        raw_payload = $3::jsonb,
+        updated_at = NOW()
+      WHERE registration_id = $4
+        AND razorpay_order_id = $5
+    `,
+    [
+      payment.razorpay_payment_id,
+      payment.razorpay_signature,
+      JSON.stringify(payment),
+      registrationId,
+      payment.razorpay_order_id
+    ]
+  );
+
+  await run(
+    `
+      INSERT INTO genesis.payment_event_logs (registration_id, event_type, payload)
+      VALUES ($1, 'payment_verified', $2::jsonb)
+    `,
+    [registrationId, JSON.stringify(payment)]
+  );
+
+  return { saved: true };
+};
+
+const getGimsDashboard = async () => {
+  if (!(await ensureSchema())) return null;
+
+  const [registrationsResult, transactionsResult, eventsResult, attemptsResult] = await Promise.all([
+    run(`
+      SELECT
+        r.registration_id,
+        r.student_name,
+        r.parent_name,
+        r.grade,
+        r.school_name,
+        r.city,
+        r.state,
+        r.mobile,
+        r.email,
+        r.test_mode,
+        r.present_board,
+        r.test_center,
+        r.qualified_stage_1,
+        r.genesis_student,
+        r.fee_amount,
+        r.currency,
+        r.razorpay_order_id,
+        r.payment_status,
+        r.registration_status,
+        r.created_at,
+        r.verified_at,
+        r.updated_at,
+        u.id AS user_id,
+        u.full_name AS user_full_name,
+        u.email AS user_email,
+        u.mobile AS user_mobile,
+        u.city AS user_city,
+        u.state AS user_state,
+        u.role AS user_role,
+        u.source AS user_source,
+        u.created_at AS user_created_at
+      FROM genesis.scholarship_registrations r
+      LEFT JOIN genesis.users u ON u.id = r.user_id
+      WHERE r.registration_status = 'confirmed'
+      ORDER BY r.created_at DESC
+      LIMIT 2000
+    `),
+    run(`
+      SELECT
+        id,
+        registration_id,
+        razorpay_order_id,
+        razorpay_payment_id,
+        amount,
+        currency,
+        status,
+        created_at,
+        updated_at
+      FROM genesis.payment_transactions
+      ORDER BY created_at DESC
+      LIMIT 5000
+    `),
+    run(`
+      SELECT
+        id,
+        registration_id,
+        event_type,
+        COALESCE(payload, '{}'::jsonb) - 'razorpay_signature' - 'signature' AS payload,
+        created_at
+      FROM genesis.payment_event_logs
+      ORDER BY created_at DESC
+      LIMIT 5000
+    `),
+    run(`
+      SELECT *
+      FROM (
+        SELECT
+          student_name,
+          mobile,
+          email,
+          fee_amount,
+          currency,
+          payment_status,
+          created_at,
+          updated_at,
+          'payment_attempt'::text AS source
+        FROM genesis.payment_attempts
+        WHERE payment_status <> 'payment_verified'
+
+        UNION ALL
+
+        SELECT
+          student_name,
+          mobile,
+          email,
+          fee_amount,
+          currency,
+          payment_status,
+          created_at,
+          updated_at,
+          'earlier_pending_registration'::text AS source
+        FROM genesis.scholarship_registrations
+        WHERE registration_status <> 'confirmed'
+          AND payment_status <> 'payment_verified'
+      ) AS unfinished_payments
+      ORDER BY created_at DESC
+      LIMIT 2000
+    `)
+  ]);
+
+  return {
+    registrations: registrationsResult.rows,
+    transactions: transactionsResult.rows,
+    events: eventsResult.rows,
+    paymentAttempts: attemptsResult.rows
+  };
+};
+
+module.exports = {
+  ensureSchema,
+  saveQualifiedRegistration,
+  savePaymentAttempt,
+  findOpenPaymentAttempt,
+  completePaymentAttempt,
+  findExistingRegistration,
+  recordPaymentEvent,
+  getGimsDashboard
+};
