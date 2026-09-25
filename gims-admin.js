@@ -122,7 +122,7 @@
     attemptEmptyState.hidden = paymentAttempts.length !== 0;
     paymentAttemptRows.innerHTML = paymentAttempts.map((attempt) => `
       <tr>
-        <td><span class="cell-title">Payment started</span><span class="cell-note">${formatDate(attempt.created_at)}</span></td>
+        <td><span class="cell-title">${attempt.source === 'earlier_pending_registration' ? 'Earlier registration' : 'Payment started'}</span><span class="cell-note">${formatDate(attempt.created_at)}</span></td>
         <td><span class="cell-title">${display(attempt.student_name)}</span></td>
         <td><span class="cell-title">${display(attempt.mobile)}</span><span class="cell-note">${display(attempt.email)}</span></td>
         <td><span class="cell-title">${money(attempt.fee_amount, attempt.currency)}</span></td>
