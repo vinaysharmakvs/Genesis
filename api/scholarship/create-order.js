@@ -1,12 +1,11 @@
 const crypto = require("crypto");
-const { savePendingRegistration, saveQualifiedRegistration } = require("../_lib/database");
+const { saveQualifiedRegistration, savePaymentAttempt, findOpenPaymentAttempt, findExistingRegistration, recordPaymentEvent } = require("../_lib/database");
 
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "rzp_test_xe08dTmycCK44q";
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 const FEE_AMOUNT_PAISE = 14900;
 const GENESIS_STUDENT_FEE_PAISE = 10000;
 const CURRENCY = "INR";
-const ALLOWED_FEE_AMOUNTS = new Set([14900, 20000, 30000]);
 
 const sendJson = (response, status, payload) => {
   response.statusCode = status;
@@ -33,7 +32,6 @@ const validateRegistration = (data) => {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanText(data.email))) return "Invalid email address.";
   if (!new Set(["yes", "no"]).has(cleanText(data.qualifiedStage1).toLowerCase())) return "Invalid Stage 1 qualification selection.";
   if (!new Set(["yes", "no"]).has(cleanText(data.genesisStudent).toLowerCase())) return "Invalid Genesis student selection.";
-  if (data.registrationFee && !ALLOWED_FEE_AMOUNTS.has(Number(data.registrationFee))) return "Invalid registration fee.";
   return "";
 };
 
@@ -50,8 +48,7 @@ const normalizeRegistration = (data) => ({
   presentBoard: cleanText(data.presentBoard, 20),
   testCenter: cleanText(data.testCenter, 60),
   qualifiedStage1: cleanText(data.qualifiedStage1, 3).toLowerCase() === "yes",
-  genesisStudent: cleanText(data.genesisStudent, 3).toLowerCase() === "yes",
-  registrationFee: Number(data.registrationFee || FEE_AMOUNT_PAISE)
+  genesisStudent: cleanText(data.genesisStudent, 3).toLowerCase() === "yes"
 });
 
 const createRazorpayOrder = async (payload) => {
@@ -85,9 +82,13 @@ module.exports = async (request, response) => {
     if (validationError) return sendJson(response, 400, { error: validationError });
 
     const registration = normalizeRegistration(data);
-    const registrationId = `GIMS-${new Date().getFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+    const existingRegistration = await findExistingRegistration({ studentName: registration.studentName, mobile: registration.mobile });
+    if (existingRegistration?.registration_status === "confirmed") {
+      return sendJson(response, 409, { error: "This student is already registered for GIMS 2026 with this parent mobile number." });
+    }
 
     if (registration.qualifiedStage1) {
+      const registrationId = `GIMS-${new Date().getFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
       const database = await saveQualifiedRegistration({
         registrationId,
         registration,
@@ -103,17 +104,31 @@ module.exports = async (request, response) => {
       });
     }
 
+    const amount = registration.genesisStudent ? GENESIS_STUDENT_FEE_PAISE : FEE_AMOUNT_PAISE;
+    const existingAttempt = await findOpenPaymentAttempt({ studentName: registration.studentName, mobile: registration.mobile });
+    const resumed = Boolean(existingAttempt);
+    const attemptId = existingAttempt?.attempt_id || `PAY-${new Date().getFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+    const intent = await savePaymentAttempt({
+      attemptId,
+      registration,
+      amount,
+      currency: CURRENCY
+    });
+    if (!intent.saved) {
+      return sendJson(response, 503, { error: "Registration database is unavailable. Please try again." });
+    }
+
     if (!RAZORPAY_KEY_SECRET) {
+      await recordPaymentEvent({ registrationId: attemptId, eventType: "payment_unavailable", payload: { amount } });
       return sendJson(response, 500, { error: "Razorpay secret is not configured on the server." });
     }
 
-    const amount = registration.genesisStudent ? GENESIS_STUDENT_FEE_PAISE : FEE_AMOUNT_PAISE;
     const order = await createRazorpayOrder({
       amount,
       currency: CURRENCY,
-      receipt: registrationId,
+      receipt: attemptId,
       notes: {
-        registrationId,
+        paymentAttemptId: attemptId,
         studentName: registration.studentName,
         parentName: registration.parentName,
         grade: registration.grade,
@@ -124,8 +139,8 @@ module.exports = async (request, response) => {
       }
     });
 
-    const database = await savePendingRegistration({
-      registrationId,
+    const database = await savePaymentAttempt({
+      attemptId,
       order,
       registration,
       amount,
@@ -135,11 +150,12 @@ module.exports = async (request, response) => {
     return sendJson(response, 200, {
       paymentRequired: true,
       keyId: RAZORPAY_KEY_ID,
-      registrationId,
+      attemptId,
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
-      database
+      database,
+      resumed
     });
   } catch (error) {
     return sendJson(response, 500, { error: error.message || "Order creation failed." });
