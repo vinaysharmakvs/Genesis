@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex, nofollow, noarchive" />
     <title>GIMS 2026 | Registration Dashboard</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="gims-admin.css?v=20260907" />
+    <link rel="stylesheet" href="gims-admin.css?v=20260929" />
   </head>
   <body>
     <main class="admin-shell">
@@ -33,70 +33,87 @@
             <p class="sync-note" data-sync-note></p>
           </div>
           <div class="header-actions">
+            <button type="button" class="button analytics-nav" data-show-analytics>Website Activity</button>
             <button type="button" class="button secondary" data-refresh>Refresh</button>
             <button type="button" class="button primary" data-export>Export CSV</button>
             <button type="button" class="button quiet" data-logout>Logout</button>
           </div>
         </header>
 
-        <section class="stats-grid" aria-label="Registration summary">
-          <article><span>Total registrations</span><strong data-stat="total">0</strong></article>
-          <article><span>Confirmed</span><strong data-stat="confirmed">0</strong></article>
-          <article><span>Awaiting payment</span><strong data-stat="awaiting">0</strong></article>
-          <article><span>Stage 1 qualified</span><strong data-stat="qualified">0</strong></article>
-          <article><span>Payments received</span><strong data-stat="paid">0</strong></article>
-          <article><span>Revenue received</span><strong data-stat="revenue">₹0</strong></article>
-        </section>
+        <section data-registration-view>
+          <section class="stats-grid" aria-label="Registration summary">
+            <article><span>Total registrations</span><strong data-stat="total">0</strong></article>
+            <article><span>Confirmed</span><strong data-stat="confirmed">0</strong></article>
+            <article><span>Awaiting payment</span><strong data-stat="awaiting">0</strong></article>
+            <article><span>Stage 1 qualified</span><strong data-stat="qualified">0</strong></article>
+            <article><span>Payments received</span><strong data-stat="paid">0</strong></article>
+            <article><span>Revenue received</span><strong data-stat="revenue">₹0</strong></article>
+          </section>
 
-        <section class="analytics-panel" aria-labelledby="analytics-title">
-          <div class="analytics-heading">
-            <div><p class="eyebrow">GA4 overview</p><h2 id="analytics-title">Website activity</h2><p>Genesis website data from Google Analytics.</p></div>
-            <span class="analytics-status" data-analytics-status>Loading secure Analytics data…</span>
-          </div>
-          <div class="analytics-content" data-analytics-content>
-            <div class="analytics-metrics">
-              <article class="analytics-metric live"><span>Active now</span><strong data-analytics-realtime>—</strong><small>last 30 minutes</small></article>
-              <article class="analytics-metric"><span>Users</span><strong data-analytics-users>—</strong><small>last 7 days</small></article>
-              <article class="analytics-metric"><span>Sessions</span><strong data-analytics-sessions>—</strong><small>last 7 days</small></article>
-              <article class="analytics-metric"><span>Page views</span><strong data-analytics-pageviews>—</strong><small>last 7 days</small></article>
-              <article class="analytics-metric"><span>Events</span><strong data-analytics-events>—</strong><small>last 7 days</small></article>
+          <section class="filters" aria-label="Dashboard filters">
+            <label class="search-field"><span>Search</span><input type="search" placeholder="Student, parent, phone, email, school or ID" data-search /></label>
+            <label><span>Board</span><select data-filter="present_board"><option value="">All boards</option></select></label>
+            <label><span>Test center</span><select data-filter="test_center"><option value="">All centers</option></select></label>
+            <label><span>Exam mode</span><select data-filter="test_mode"><option value="">All modes</option></select></label>
+            <label><span>Stage 1</span><select data-filter="qualified_stage_1"><option value="">All students</option><option value="true">Qualified</option><option value="false">Not qualified</option></select></label>
+            <label><span>Payment</span><select data-filter="payment_status"><option value="">All statuses</option></select></label>
+          </section>
+
+          <section class="table-panel">
+            <div class="table-heading"><h2>GIMS Registrations</h2><span data-result-count>0 records</span></div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>Registration</th><th>Student</th><th>Parent &amp; contact</th><th>School</th><th>Exam</th><th>Stage 1</th><th>Payment</th><th></th></tr></thead>
+                <tbody data-registration-rows></tbody>
+              </table>
             </div>
-            <div class="analytics-detail-grid">
-              <article class="analytics-card"><div class="analytics-card-heading"><h3>Sessions trend</h3><span data-analytics-period>Last 7 days</span></div><div class="analytics-bars" data-analytics-trend aria-label="Sessions by day"></div></article>
-              <article class="analytics-card"><div class="analytics-card-heading"><h3>Most visited pages</h3><span>By page views</span></div><ol class="top-pages" data-analytics-pages></ol></article>
+            <div class="empty-state" data-empty-state hidden>No registrations match these filters.</div>
+          </section>
+
+          <section class="table-panel payment-attempts-panel">
+            <div class="table-heading"><h2>Unfinished Payment Attempts</h2><span data-attempt-count>0 attempts</span></div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>Started</th><th>Student</th><th>Parent contact</th><th>Amount due</th><th>Payment status</th></tr></thead>
+                <tbody data-payment-attempt-rows></tbody>
+              </table>
+            </div>
+            <div class="empty-state" data-attempt-empty-state hidden>No unfinished payment attempts.</div>
+          </section>
+        </section>
+
+        <section data-analytics-view hidden>
+          <div class="analytics-view-actions">
+            <button type="button" class="back-to-registrations" data-show-registrations>← Registration Dashboard</button>
+            <div class="analytics-toolbar" aria-label="Website activity controls">
+              <div class="analytics-range" role="group" aria-label="Analytics date range">
+                <button type="button" data-analytics-range="today">Today</button>
+                <button type="button" class="is-active" data-analytics-range="7d">7 days</button>
+                <button type="button" data-analytics-range="30d">30 days</button>
+                <button type="button" data-analytics-range="90d">90 days</button>
+              </div>
+              <button type="button" class="refresh-analytics" data-refresh-analytics>↻ Refresh</button>
             </div>
           </div>
-        </section>
-
-        <section class="filters" aria-label="Dashboard filters">
-          <label class="search-field"><span>Search</span><input type="search" placeholder="Student, parent, phone, email, school or ID" data-search /></label>
-          <label><span>Board</span><select data-filter="present_board"><option value="">All boards</option></select></label>
-          <label><span>Test center</span><select data-filter="test_center"><option value="">All centers</option></select></label>
-          <label><span>Exam mode</span><select data-filter="test_mode"><option value="">All modes</option></select></label>
-          <label><span>Stage 1</span><select data-filter="qualified_stage_1"><option value="">All students</option><option value="true">Qualified</option><option value="false">Not qualified</option></select></label>
-          <label><span>Payment</span><select data-filter="payment_status"><option value="">All statuses</option></select></label>
-        </section>
-
-        <section class="table-panel">
-          <div class="table-heading"><h2>GIMS Registrations</h2><span data-result-count>0 records</span></div>
-          <div class="table-scroll">
-            <table>
-              <thead><tr><th>Registration</th><th>Student</th><th>Parent &amp; contact</th><th>School</th><th>Exam</th><th>Stage 1</th><th>Payment</th><th></th></tr></thead>
-              <tbody data-registration-rows></tbody>
-            </table>
-          </div>
-          <div class="empty-state" data-empty-state hidden>No registrations match these filters.</div>
-        </section>
-
-        <section class="table-panel payment-attempts-panel">
-          <div class="table-heading"><h2>Unfinished Payment Attempts</h2><span data-attempt-count>0 attempts</span></div>
-          <div class="table-scroll">
-            <table>
-              <thead><tr><th>Started</th><th>Student</th><th>Parent contact</th><th>Amount due</th><th>Payment status</th></tr></thead>
-              <tbody data-payment-attempt-rows></tbody>
-            </table>
-          </div>
-          <div class="empty-state" data-attempt-empty-state hidden>No unfinished payment attempts.</div>
+          <section class="analytics-panel" aria-labelledby="analytics-title">
+            <div class="analytics-heading">
+              <div><p class="eyebrow">GA4 overview</p><h2 id="analytics-title">Website activity</h2><p>Genesis website data from Google Analytics.</p></div>
+              <span class="analytics-status" data-analytics-status>Loading secure Analytics data…</span>
+            </div>
+            <div class="analytics-content" data-analytics-content>
+              <div class="analytics-metrics">
+                <article class="analytics-metric live"><span>Active now</span><strong data-analytics-realtime>—</strong><small>last 30 minutes</small></article>
+                <article class="analytics-metric"><span>Users</span><strong data-analytics-users>—</strong><small data-analytics-summary-period>last 7 days</small></article>
+                <article class="analytics-metric"><span>Sessions</span><strong data-analytics-sessions>—</strong><small data-analytics-summary-period>last 7 days</small></article>
+                <article class="analytics-metric"><span>Page views</span><strong data-analytics-pageviews>—</strong><small data-analytics-summary-period>last 7 days</small></article>
+                <article class="analytics-metric"><span>Events</span><strong data-analytics-events>—</strong><small data-analytics-summary-period>last 7 days</small></article>
+              </div>
+              <div class="analytics-detail-grid">
+                <article class="analytics-card"><div class="analytics-card-heading"><h3>Sessions trend</h3><span data-analytics-period>Last 7 days</span></div><div class="analytics-bars" data-analytics-trend aria-label="Sessions by day"></div></article>
+                <article class="analytics-card"><div class="analytics-card-heading"><h3>Most visited pages</h3><span>By page views</span></div><ol class="top-pages" data-analytics-pages></ol></article>
+              </div>
+            </div>
+          </section>
         </section>
       </section>
     </main>
@@ -106,6 +123,6 @@
       <div data-details-content></div>
     </dialog>
 
-    <script src="gims-admin.js?v=20260907" defer></script>
+    <script src="gims-admin.js?v=20260929" defer></script>
   </body>
 </html>
