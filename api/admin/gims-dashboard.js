@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const { getGimsDashboard } = require("../_lib/database");
+const { getAnalyticsOverview } = require("../_lib/google-analytics");
 
 const ADMIN_CODE = process.env.GIMS_ADMIN_CODE;
 
@@ -46,13 +47,14 @@ module.exports = async (request, response) => {
       return sendJson(response, 401, { error: "Invalid security code." });
     }
 
-    const dashboard = await getGimsDashboard();
+    const [dashboard, analytics] = await Promise.all([getGimsDashboard(), getAnalyticsOverview()]);
     if (!dashboard) {
       return sendJson(response, 503, { error: "Registration database is unavailable." });
     }
 
     return sendJson(response, 200, {
       generatedAt: new Date().toISOString(),
+      analytics,
       ...dashboard
     });
   } catch (error) {
