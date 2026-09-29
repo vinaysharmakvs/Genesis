@@ -72,26 +72,34 @@ const getReport = async (path, body, accessToken) => {
   return response.json();
 };
 
-const getAnalyticsOverview = async () => {
+const getAnalyticsOverview = async (range = "7d") => {
   const configuration = getConfiguration();
   if (configuration.error) return { configured: false, message: configuration.error };
+
+  const ranges = {
+    today: { startDate: "today", label: "Today" },
+    "7d": { startDate: "7daysAgo", label: "Last 7 days" },
+    "30d": { startDate: "30daysAgo", label: "Last 30 days" },
+    "90d": { startDate: "90daysAgo", label: "Last 90 days" }
+  };
+  const selectedRange = ranges[range] || ranges["7d"];
 
   try {
     const accessToken = await getAccessToken(configuration);
     const property = `properties/${configuration.propertyId}`;
     const [overview, trend, pages, realtime] = await Promise.all([
       getReport(`${property}:runReport`, {
-        dateRanges: [{ startDate: "7daysAgo", endDate: "today" }],
+        dateRanges: [{ startDate: selectedRange.startDate, endDate: "today" }],
         metrics: [{ name: "activeUsers" }, { name: "sessions" }, { name: "screenPageViews" }, { name: "eventCount" }]
       }, accessToken),
       getReport(`${property}:runReport`, {
-        dateRanges: [{ startDate: "7daysAgo", endDate: "today" }],
+        dateRanges: [{ startDate: selectedRange.startDate, endDate: "today" }],
         dimensions: [{ name: "date" }],
         metrics: [{ name: "sessions" }],
         orderBys: [{ dimension: { dimensionName: "date" } }]
       }, accessToken),
       getReport(`${property}:runReport`, {
-        dateRanges: [{ startDate: "7daysAgo", endDate: "today" }],
+        dateRanges: [{ startDate: selectedRange.startDate, endDate: "today" }],
         dimensions: [{ name: "pagePath" }],
         metrics: [{ name: "screenPageViews" }],
         orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
@@ -104,7 +112,7 @@ const getAnalyticsOverview = async () => {
 
     return {
       configured: true,
-      period: "Last 7 days",
+      period: selectedRange.label,
       realtimeActiveUsers: metricValue(realtime),
       totals: {
         users: metricValue(overview, 0),
