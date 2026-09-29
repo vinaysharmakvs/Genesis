@@ -47,7 +47,9 @@ module.exports = async (request, response) => {
       return sendJson(response, 401, { error: "Invalid security code." });
     }
 
-    const [dashboard, analytics] = await Promise.all([getGimsDashboard(), getAnalyticsOverview()]);
+    const allowedAnalyticsRanges = new Set(["today", "7d", "30d", "90d"]);
+    const analyticsRange = allowedAnalyticsRanges.has(data.analyticsRange) ? data.analyticsRange : "7d";
+    const [dashboard, analytics] = await Promise.all([getGimsDashboard(), getAnalyticsOverview(analyticsRange)]);
     if (!dashboard) {
       return sendJson(response, 503, { error: "Registration database is unavailable." });
     }
