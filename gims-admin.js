@@ -10,6 +10,18 @@
   const emptyState = document.querySelector('[data-empty-state]');
   const resultCount = document.querySelector('[data-result-count]');
   const syncNote = document.querySelector('[data-sync-note]');
+  const analyticsStatus = document.querySelector('[data-analytics-status]');
+  const analyticsContent = document.querySelector('[data-analytics-content]');
+  const analyticsValues = {
+    realtime: document.querySelector('[data-analytics-realtime]'),
+    users: document.querySelector('[data-analytics-users]'),
+    sessions: document.querySelector('[data-analytics-sessions]'),
+    pageViews: document.querySelector('[data-analytics-pageviews]'),
+    events: document.querySelector('[data-analytics-events]')
+  };
+  const analyticsTrend = document.querySelector('[data-analytics-trend]');
+  const analyticsPages = document.querySelector('[data-analytics-pages]');
+  const analyticsPeriod = document.querySelector('[data-analytics-period]');
   const searchInput = document.querySelector('[data-search]');
   const filterElements = [...document.querySelectorAll('[data-filter]')];
   const detailsDialog = document.querySelector('[data-details-dialog]');
@@ -50,6 +62,7 @@
       syncNote.textContent = `Updated ${formatDate(data.generatedAt)} · ${registrations.length} confirmed registrations · ${paymentAttempts.length} unfinished payment attempts`;
       populateFilters();
       updateStats();
+      renderAnalytics(data.analytics);
       renderRows();
       renderPaymentAttempts();
     } catch (error) {
@@ -58,6 +71,34 @@
       submitButton.disabled = false;
       submitButton.textContent = 'Open Dashboard';
     }
+  };
+
+  const number = (value) => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(Number(value || 0));
+  const shortDate = (value) => value && value.length === 8 ? `${value.slice(6, 8)} ${new Intl.DateTimeFormat('en-IN', { month: 'short' }).format(new Date(`${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}T00:00:00`))}` : '—';
+  const renderAnalytics = (analytics) => {
+    if (!analytics?.configured) {
+      analyticsStatus.className = 'analytics-status pending';
+      analyticsStatus.textContent = analytics?.message || 'Secure Analytics connection is pending.';
+      analyticsContent.classList.add('analytics-unavailable');
+      Object.values(analyticsValues).forEach((element) => { element.textContent = '—'; });
+      analyticsTrend.innerHTML = '<p class="analytics-empty">Website Analytics will appear here once the private service-account key is added to hosting settings.</p>';
+      analyticsPages.innerHTML = '';
+      return;
+    }
+
+    analyticsStatus.className = 'analytics-status live';
+    analyticsStatus.textContent = 'Live GA4 connection';
+    analyticsContent.classList.remove('analytics-unavailable');
+    analyticsValues.realtime.textContent = number(analytics.realtimeActiveUsers);
+    analyticsValues.users.textContent = number(analytics.totals?.users);
+    analyticsValues.sessions.textContent = number(analytics.totals?.sessions);
+    analyticsValues.pageViews.textContent = number(analytics.totals?.pageViews);
+    analyticsValues.events.textContent = number(analytics.totals?.events);
+    analyticsPeriod.textContent = analytics.period || 'Last 7 days';
+
+    const highest = Math.max(...(analytics.trend || []).map((item) => item.sessions), 1);
+    analyticsTrend.innerHTML = (analytics.trend || []).map((item) => `<div class="analytics-bar-item"><span class="analytics-bar-value">${number(item.sessions)}</span><span class="analytics-bar" style="height:${Math.max(10, Math.round((item.sessions / highest) * 100))}%"></span><span class="analytics-bar-label">${shortDate(item.date)}</span></div>`).join('') || '<p class="analytics-empty">No sessions recorded in this period yet.</p>';
+    analyticsPages.innerHTML = (analytics.topPages || []).map((item) => `<li><span title="${escapeHtml(item.path)}">${display(item.path)}</span><strong>${number(item.views)}</strong></li>`).join('') || '<li class="analytics-empty">No page-view data recorded yet.</li>';
   };
 
   const populateFilters = () => {
