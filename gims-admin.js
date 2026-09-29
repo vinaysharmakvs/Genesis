@@ -3,6 +3,12 @@
   const loginForm = document.querySelector('[data-login-form]');
   const loginMessage = document.querySelector('[data-login-message]');
   const dashboard = document.querySelector('[data-dashboard]');
+  const registrationView = document.querySelector('[data-registration-view]');
+  const analyticsView = document.querySelector('[data-analytics-view]');
+  const analyticsNavButton = document.querySelector('[data-show-analytics]');
+  const registrationsNavButton = document.querySelector('[data-show-registrations]');
+  const analyticsRangeButtons = [...document.querySelectorAll('[data-analytics-range]')];
+  const analyticsRefreshButton = document.querySelector('[data-refresh-analytics]');
   const rowsElement = document.querySelector('[data-registration-rows]');
   const paymentAttemptRows = document.querySelector('[data-payment-attempt-rows]');
   const attemptCount = document.querySelector('[data-attempt-count]');
@@ -22,6 +28,7 @@
   const analyticsTrend = document.querySelector('[data-analytics-trend]');
   const analyticsPages = document.querySelector('[data-analytics-pages]');
   const analyticsPeriod = document.querySelector('[data-analytics-period]');
+  const analyticsSummaryPeriods = [...document.querySelectorAll('[data-analytics-summary-period]')];
   const searchInput = document.querySelector('[data-search]');
   const filterElements = [...document.querySelectorAll('[data-filter]')];
   const detailsDialog = document.querySelector('[data-details-dialog]');
@@ -31,6 +38,7 @@
   let transactions = [];
   let events = [];
   let paymentAttempts = [];
+  let analyticsRange = '7d';
 
   const escapeHtml = (value) => String(value ?? '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -49,7 +57,7 @@
       const response = await fetch('/api/admin/gims-dashboard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: securityCode })
+        body: JSON.stringify({ code: securityCode, analyticsRange })
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Unable to load dashboard.');
@@ -95,10 +103,38 @@
     analyticsValues.pageViews.textContent = number(analytics.totals?.pageViews);
     analyticsValues.events.textContent = number(analytics.totals?.events);
     analyticsPeriod.textContent = analytics.period || 'Last 7 days';
+    analyticsSummaryPeriods.forEach((element) => { element.textContent = (analytics.period || 'Last 7 days').toLowerCase(); });
 
-    const highest = Math.max(...(analytics.trend || []).map((item) => item.sessions), 1);
-    analyticsTrend.innerHTML = (analytics.trend || []).map((item) => `<div class="analytics-bar-item"><span class="analytics-bar-value">${number(item.sessions)}</span><span class="analytics-bar" style="height:${Math.max(10, Math.round((item.sessions / highest) * 100))}%"></span><span class="analytics-bar-label">${shortDate(item.date)}</span></div>`).join('') || '<p class="analytics-empty">No sessions recorded in this period yet.</p>';
+    const allTrend = analytics.trend || [];
+    const displayStep = Math.max(1, Math.ceil(allTrend.length / 14));
+    const displayTrend = allTrend.filter((item, index) => index % displayStep === 0 || index === allTrend.length - 1);
+    const highest = Math.max(...allTrend.map((item) => item.sessions), 1);
+    analyticsTrend.innerHTML = displayTrend.map((item) => `<div class="analytics-bar-item"><span class="analytics-bar-value">${number(item.sessions)}</span><span class="analytics-bar" style="height:${Math.max(10, Math.round((item.sessions / highest) * 100))}%"></span><span class="analytics-bar-label">${shortDate(item.date)}</span></div>`).join('') || '<p class="analytics-empty">No sessions recorded in this period yet.</p>';
     analyticsPages.innerHTML = (analytics.topPages || []).map((item) => `<li><span title="${escapeHtml(item.path)}">${display(item.path)}</span><strong>${number(item.views)}</strong></li>`).join('') || '<li class="analytics-empty">No page-view data recorded yet.</li>';
+  };
+
+  const showAnalyticsView = () => {
+    registrationView.hidden = true;
+    analyticsView.hidden = false;
+    analyticsNavButton.classList.add('is-active');
+    analyticsNavButton.setAttribute('aria-current', 'page');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const setAnalyticsRange = (range) => {
+    analyticsRange = range;
+    analyticsRangeButtons.forEach((button) => {
+      const active = button.dataset.analyticsRange === range;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    loadDashboard();
+  };
+  const showRegistrationView = () => {
+    analyticsView.hidden = true;
+    registrationView.hidden = false;
+    analyticsNavButton.classList.remove('is-active');
+    analyticsNavButton.removeAttribute('aria-current');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const populateFilters = () => {
@@ -208,7 +244,11 @@
   loginForm.addEventListener('submit', (event) => { event.preventDefault(); securityCode = loginForm.securityCode.value; loadDashboard(); });
   document.querySelector('[data-refresh]').addEventListener('click', loadDashboard);
   document.querySelector('[data-export]').addEventListener('click', exportCsv);
-  document.querySelector('[data-logout]').addEventListener('click', () => { securityCode = ''; registrations = []; transactions = []; events = []; paymentAttempts = []; dashboard.hidden = true; loginPanel.hidden = false; loginForm.reset(); loginForm.securityCode.focus(); });
+  document.querySelector('[data-logout]').addEventListener('click', () => { securityCode = ''; registrations = []; transactions = []; events = []; paymentAttempts = []; showRegistrationView(); dashboard.hidden = true; loginPanel.hidden = false; loginForm.reset(); loginForm.securityCode.focus(); });
+  analyticsNavButton.addEventListener('click', showAnalyticsView);
+  registrationsNavButton.addEventListener('click', showRegistrationView);
+  analyticsRangeButtons.forEach((button) => button.addEventListener('click', () => setAnalyticsRange(button.dataset.analyticsRange)));
+  analyticsRefreshButton.addEventListener('click', () => loadDashboard());
   document.querySelector('[data-dialog-close]').addEventListener('click', () => detailsDialog.close());
   detailsDialog.addEventListener('click', (event) => { if (event.target === detailsDialog) detailsDialog.close(); });
   rowsElement.addEventListener('click', (event) => { const button = event.target.closest('[data-view]'); if (button) showDetails(button.dataset.view); });
