@@ -4,7 +4,6 @@ const { saveQualifiedRegistration, savePaymentAttempt, findOpenPaymentAttempt, f
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "rzp_test_xe08dTmycCK44q";
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 const FEE_AMOUNT_PAISE = 14900;
-const GENESIS_STUDENT_FEE_PAISE = 10000;
 const CURRENCY = "INR";
 
 const sendJson = (response, status, payload) => {
@@ -24,14 +23,13 @@ const cleanText = (value = "", max = 120) =>
   String(value).replace(/[<>]/g, "").replace(/\s+/g, " ").trim().slice(0, max);
 
 const validateRegistration = (data) => {
-  const required = ["studentName", "parentName", "grade", "schoolName", "city", "state", "mobile", "email", "testMode", "presentBoard", "testCenter", "qualifiedStage1", "genesisStudent"];
+  const required = ["studentName", "parentName", "grade", "schoolName", "city", "state", "mobile", "email", "testMode", "presentBoard", "testCenter", "qualifiedStage1"];
   for (const key of required) {
     if (!cleanText(data[key])) return `Missing required field: ${key}`;
   }
   if (!/^[6-9]\d{9}$/.test(cleanText(data.mobile))) return "Invalid Indian mobile number.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanText(data.email))) return "Invalid email address.";
   if (!new Set(["yes", "no"]).has(cleanText(data.qualifiedStage1).toLowerCase())) return "Invalid Stage 1 qualification selection.";
-  if (!new Set(["yes", "no"]).has(cleanText(data.genesisStudent).toLowerCase())) return "Invalid Genesis student selection.";
   return "";
 };
 
@@ -48,7 +46,7 @@ const normalizeRegistration = (data) => ({
   presentBoard: cleanText(data.presentBoard, 20),
   testCenter: cleanText(data.testCenter, 60),
   qualifiedStage1: cleanText(data.qualifiedStage1, 3).toLowerCase() === "yes",
-  genesisStudent: cleanText(data.genesisStudent, 3).toLowerCase() === "yes"
+  genesisStudent: false
 });
 
 const createRazorpayOrder = async (payload) => {
@@ -104,7 +102,7 @@ module.exports = async (request, response) => {
       });
     }
 
-    const amount = registration.genesisStudent ? GENESIS_STUDENT_FEE_PAISE : FEE_AMOUNT_PAISE;
+    const amount = FEE_AMOUNT_PAISE;
     const existingAttempt = await findOpenPaymentAttempt({ studentName: registration.studentName, mobile: registration.mobile });
     const resumed = Boolean(existingAttempt);
     const attemptId = existingAttempt?.attempt_id || `PAY-${new Date().getFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
