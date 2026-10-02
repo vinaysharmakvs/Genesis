@@ -393,6 +393,50 @@ const completePaymentAttempt = async ({ attemptId, payment, registrationId }) =>
   return { saved: true, registrationId };
 };
 
+const reconcileCapturedPayment = async ({ orderId, paymentId, amount, currency, eventId }) => {
+  if (!(await ensureSchema())) return { saved: false, retryable: true, reason: "DATABASE_URL not configured" };
+
+  const attemptResult = await run(
+    `
+      SELECT attempt_id, registration_id, fee_amount, currency
+      FROM genesis.payment_attempts
+      WHERE razorpay_order_id = $1
+      LIMIT 1
+    `,
+    [orderId]
+  );
+  const attempt = attemptResult?.rows?.[0];
+  if (!attempt) return { saved: false, retryable: false, reason: "No matching GIMS payment attempt." };
+  if (attempt.registration_id) return { saved: true, alreadyProcessed: true, registrationId: attempt.registration_id };
+  if (Number(amount) !== Number(attempt.fee_amount) * 100 || String(currency || "").toUpperCase() !== String(attempt.currency || "").toUpperCase()) {
+    return { saved: false, retryable: false, reason: "Payment amount or currency does not match the GIMS order." };
+  }
+
+  const registrationId = `GIMS-${new Date().getFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+  const completed = await completePaymentAttempt({
+    attemptId: attempt.attempt_id,
+    registrationId,
+    payment: {
+      razorpay_order_id: orderId,
+      razorpay_payment_id: paymentId,
+      razorpay_signature: null,
+      webhook_event_id: eventId || null,
+      verification_source: "razorpay_webhook"
+    }
+  });
+  if (completed.saved) return { ...completed, alreadyProcessed: false };
+
+  // A browser verification and the webhook can arrive together. Treat a completed
+  // registration as success so Razorpay retries cannot create duplicate records.
+  const settledResult = await run(
+    `SELECT registration_id FROM genesis.payment_attempts WHERE razorpay_order_id = $1 LIMIT 1`,
+    [orderId]
+  );
+  const settledRegistrationId = settledResult?.rows?.[0]?.registration_id;
+  if (settledRegistrationId) return { saved: true, alreadyProcessed: true, registrationId: settledRegistrationId };
+  return { saved: false, retryable: true, reason: completed.reason || "Unable to confirm the GIMS payment." };
+};
+
 const findExistingRegistration = async ({ studentName, mobile, year = new Date().getFullYear() }) => {
   if (!(await ensureSchema())) return null;
   const result = await run(
@@ -587,6 +631,7 @@ module.exports = {
   savePaymentAttempt,
   findOpenPaymentAttempt,
   completePaymentAttempt,
+  reconcileCapturedPayment,
   findExistingRegistration,
   recordPaymentEvent,
   getGimsDashboard
