@@ -55,6 +55,7 @@ const ensureSchema = async () => {
       mobile TEXT NOT NULL,
       email TEXT NOT NULL,
       test_mode TEXT NOT NULL,
+      test_date DATE,
       present_board TEXT,
       test_center TEXT,
       qualified_stage_1 BOOLEAN NOT NULL DEFAULT FALSE,
@@ -70,6 +71,7 @@ const ensureSchema = async () => {
     )
   `);
   await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS present_board TEXT");
+  await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS test_date DATE");
   await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS test_center TEXT");
   await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS qualified_stage_1 BOOLEAN NOT NULL DEFAULT FALSE");
   await run("ALTER TABLE genesis.scholarship_registrations ADD COLUMN IF NOT EXISTS genesis_student BOOLEAN NOT NULL DEFAULT FALSE");
@@ -153,10 +155,10 @@ const savePendingRegistration = async ({ registrationId, order = null, registrat
     `
       INSERT INTO genesis.scholarship_registrations (
         registration_id, user_id, student_name, parent_name, grade, school_name,
-        city, state, mobile, email, test_mode, present_board, test_center, qualified_stage_1, genesis_student, fee_amount, currency,
+        city, state, mobile, email, test_mode, test_date, present_board, test_center, qualified_stage_1, genesis_student, fee_amount, currency,
         razorpay_order_id, payment_status, registration_status
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, 'payment_pending', 'payment_pending')
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, 'payment_pending', 'payment_pending')
       ON CONFLICT (registration_id)
       DO UPDATE SET
         user_id = EXCLUDED.user_id,
@@ -169,6 +171,7 @@ const savePendingRegistration = async ({ registrationId, order = null, registrat
         mobile = EXCLUDED.mobile,
         email = EXCLUDED.email,
         test_mode = EXCLUDED.test_mode,
+        test_date = EXCLUDED.test_date,
         present_board = EXCLUDED.present_board,
         test_center = EXCLUDED.test_center,
         qualified_stage_1 = FALSE,
@@ -193,6 +196,7 @@ const savePendingRegistration = async ({ registrationId, order = null, registrat
       registration.mobile,
       registration.email,
       registration.testMode,
+      registration.testDate,
       registration.presentBoard,
       registration.testCenter,
       false,
@@ -246,10 +250,10 @@ const saveQualifiedRegistration = async ({ registrationId, registration, currenc
     `
       INSERT INTO genesis.scholarship_registrations (
         registration_id, user_id, student_name, parent_name, grade, school_name,
-        city, state, mobile, email, test_mode, present_board, test_center,
+        city, state, mobile, email, test_mode, test_date, present_board, test_center,
         qualified_stage_1, genesis_student, fee_amount, currency, payment_status, registration_status, verified_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, TRUE, $14, 0, $15, 'not_required', 'confirmed', NOW())
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, TRUE, $15, 0, $16, 'not_required', 'confirmed', NOW())
       ON CONFLICT (registration_id)
       DO UPDATE SET
         user_id = EXCLUDED.user_id,
@@ -262,6 +266,7 @@ const saveQualifiedRegistration = async ({ registrationId, registration, currenc
         mobile = EXCLUDED.mobile,
         email = EXCLUDED.email,
         test_mode = EXCLUDED.test_mode,
+        test_date = EXCLUDED.test_date,
         present_board = EXCLUDED.present_board,
         test_center = EXCLUDED.test_center,
         qualified_stage_1 = TRUE,
@@ -284,6 +289,7 @@ const saveQualifiedRegistration = async ({ registrationId, registration, currenc
       registration.mobile,
       registration.email,
       registration.testMode,
+      registration.testDate,
       registration.presentBoard,
       registration.testCenter,
       registration.genesisStudent,
@@ -377,12 +383,12 @@ const completePaymentAttempt = async ({ attemptId, payment, registrationId }) =>
     `
       INSERT INTO genesis.scholarship_registrations (
         registration_id, user_id, student_name, parent_name, grade, school_name, city, state, mobile, email,
-        test_mode, present_board, test_center, qualified_stage_1, genesis_student, fee_amount, currency,
+        test_mode, test_date, present_board, test_center, qualified_stage_1, genesis_student, fee_amount, currency,
         razorpay_order_id, payment_status, registration_status, verified_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, FALSE, $14, $15, $16, $17, 'payment_verified', 'confirmed', NOW())
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, FALSE, $15, $16, $17, $18, 'payment_verified', 'confirmed', NOW())
     `,
-    [registrationId, userId, registration.studentName, registration.parentName, registration.grade, registration.schoolName, registration.city, registration.state, registration.mobile, registration.email, registration.testMode, registration.presentBoard, registration.testCenter, registration.genesisStudent, attempt.fee_amount, attempt.currency, attempt.razorpay_order_id]
+    [registrationId, userId, registration.studentName, registration.parentName, registration.grade, registration.schoolName, registration.city, registration.state, registration.mobile, registration.email, registration.testMode, registration.testDate, registration.presentBoard, registration.testCenter, registration.genesisStudent, attempt.fee_amount, attempt.currency, attempt.razorpay_order_id]
   );
   await run(
     `INSERT INTO genesis.payment_transactions (registration_id, razorpay_order_id, razorpay_payment_id, razorpay_signature, amount, currency, status, raw_payload)
@@ -527,6 +533,7 @@ const getGimsDashboard = async () => {
         r.mobile,
         r.email,
         r.test_mode,
+        r.test_date,
         r.present_board,
         r.test_center,
         r.qualified_stage_1,
