@@ -54,6 +54,7 @@
             <label class="search-field"><span>Search</span><input type="search" placeholder="Student, parent, phone, email, school or ID" data-search /></label>
             <label><span>Board</span><select data-filter="present_board"><option value="">All boards</option></select></label>
             <label><span>Test center</span><select data-filter="test_center"><option value="">All centers</option></select></label>
+            <label><span>Test date</span><select data-filter="test_date"><option value="">All dates</option></select></label>
             <label><span>Exam mode</span><select data-filter="test_mode"><option value="">All modes</option></select></label>
             <label><span>Stage 1</span><select data-filter="qualified_stage_1"><option value="">All students</option><option value="true">Qualified</option><option value="false">Not qualified</option></select></label>
             <label><span>Payment</span><select data-filter="payment_status"><option value="">All statuses</option></select></label>
@@ -71,7 +72,7 @@
           </section>
 
           <section class="table-panel payment-attempts-panel">
-            <div class="table-heading"><h2>Unfinished Payment Attempts</h2><span data-attempt-count>0 attempts</span></div>
+            <div class="table-heading"><div><h2>Unfinished Payment Attempts</h2><p>Use a Razorpay Payment ID only after Razorpay confirms it as captured.</p></div><div class="table-heading-actions"><span data-attempt-count>0 attempts</span><button class="reconcile-button" type="button" data-reconcile-open>Reconcile payment</button></div></div>
             <div class="table-scroll">
               <table>
                 <thead><tr><th>Started</th><th>Student</th><th>Parent contact</th><th>Amount due</th><th>Payment status</th></tr></thead>
@@ -123,6 +124,19 @@
       <div data-details-content></div>
     </dialog>
 
-    <script src="gims-admin.js?v=20260929" defer></script>
+    <dialog class="reconcile-dialog" data-reconcile-dialog>
+      <button class="dialog-close" type="button" data-reconcile-close aria-label="Close payment reconciliation">×</button>
+      <form data-reconcile-form>
+        <p class="eyebrow">Secure reconciliation</p>
+        <h2>Confirm a Razorpay payment</h2>
+        <p>Paste the Payment ID from Razorpay. Genesis will check the payment directly with Razorpay and only confirm it when the payment is captured, ₹149, and linked to an unfinished GIMS order.</p>
+        <label for="razorpayPaymentId">Razorpay Payment ID</label>
+        <input id="razorpayPaymentId" name="paymentId" autocomplete="off" placeholder="pay_…" required pattern="pay_[A-Za-z0-9]+" />
+        <p class="reconcile-message" data-reconcile-message role="alert"></p>
+        <button class="button primary" type="submit">Verify and confirm payment</button>
+      </form>
+    </dialog>
+
+    <script src="gims-admin.js?v=20261002" defer></script>
   </body>
 </html>
