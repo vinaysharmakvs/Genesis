@@ -114,6 +114,14 @@
                 <option value="Genesis Zirakpur">Genesis Zirakpur</option>
               </select>
             </label>
+            <label>
+              <span class="sr-only">Choose your GIMS test date</span>
+              <select name="testDate" required>
+                <option value="">Choose your GIMS Test Date</option>
+                <option value="2026-11-22">22 November 2026</option>
+                <option value="2026-11-29">29 November 2026</option>
+              </select>
+            </label>
 
             <input type="hidden" name="testMode" value="GIMS 2026" />
 
@@ -178,9 +186,9 @@
               <div class="clock-icon" aria-hidden="true"><span></span></div>
               <strong>Choose Your GIMS Date</strong>
               <div class="gims-date-options" aria-label="Available GIMS examination dates">
-                <div><small>Option 01</small><b>04 October 2026</b></div>
+                <div><small>Option 01</small><b>22 November 2026</b></div>
                 <span aria-hidden="true">OR</span>
-                <div><small>Option 02</small><b>25 October 2026</b></div>
+                <div><small>Option 02</small><b>29 November 2026</b></div>
               </div>
               <p>Same GIMS experience. Choose the date that works best for you.</p>
             </div>
@@ -428,7 +436,7 @@
                 <details>
                   <summary><span>When will GIMS be conducted?</span><b aria-hidden="true"></b></summary>
                   <div class="faq-answer">
-                    <p>4 October 2026 or 25 October 2026.</p>
+                    <p>22 November 2026 or 29 November 2026.</p>
                   </div>
                 </details>
                 <details>
@@ -451,7 +459,7 @@
               <div class="share-cta-content">
                 <p class="share-cta-eyebrow">GIMS 2026</p>
                 <h2 id="share-cta-title">Your Potential Deserves to Be Discovered.</h2>
-                <p class="final-cta-summary"><span>04 October or 25 October</span><span>₹149 Early Bird</span></p>
+                <p class="final-cta-summary"><span>22 November or 29 November</span><span>₹149 Early Bird</span></p>
                 <a class="share-register-button" href="#registration-title">Register for GIMS 2026</a>
               </div>
             </section>
@@ -543,6 +551,7 @@
           mobile: data.get('phone'),
           email: data.get('email'),
           testMode: data.get('testMode'),
+          testDate: data.get('testDate'),
           presentBoard: data.get('presentBoard'),
           testCenter: data.get('testCenter'),
           qualifiedStage1: data.get('qualifiedStage1')
@@ -584,7 +593,7 @@
             description: 'GIMS Scholarship Test 2026',
             order_id: order.orderId,
             prefill: { name: payload.parentName, email: payload.email, contact: payload.mobile },
-            notes: { studentName: payload.studentName, testMode: payload.testMode },
+            notes: { studentName: payload.studentName, testMode: payload.testMode, testDate: payload.testDate },
             handler: async (payment) => {
               setLoading(true, 'Verifying payment...');
               try {
