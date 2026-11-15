@@ -33,6 +33,9 @@
   const filterElements = [...document.querySelectorAll('[data-filter]')];
   const detailsDialog = document.querySelector('[data-details-dialog]');
   const detailsContent = document.querySelector('[data-details-content]');
+  const reconcileDialog = document.querySelector('[data-reconcile-dialog]');
+  const reconcileForm = document.querySelector('[data-reconcile-form]');
+  const reconcileMessage = document.querySelector('[data-reconcile-message]');
   let securityCode = '';
   let registrations = [];
   let transactions = [];
@@ -45,6 +48,7 @@
     .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   const display = (value, fallback = '—') => value === null || value === undefined || value === '' ? fallback : escapeHtml(value);
   const formatDate = (value) => value ? new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : '—';
+  const formatTestDate = (value) => value ? new Intl.DateTimeFormat('en-IN', { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(`${String(value).slice(0, 10)}T00:00:00Z`)) : '—';
   const money = (amount, currency = 'INR') => new Intl.NumberFormat('en-IN', { style: 'currency', currency, maximumFractionDigits: 0 }).format(Number(amount || 0));
   const statusClass = (value) => /verified|confirmed|not_required/i.test(value || '') ? 'success' : /pending|created/i.test(value || '') ? 'warn' : '';
 
@@ -166,7 +170,7 @@
   const filteredRegistrations = () => {
     const query = searchInput.value.trim().toLowerCase();
     return registrations.filter((row) => {
-      const searchText = [row.registration_id, row.student_name, row.parent_name, row.mobile, row.email, row.school_name, row.city, row.state].join(' ').toLowerCase();
+      const searchText = [row.registration_id, row.student_name, row.parent_name, row.mobile, row.email, row.school_name, row.city, row.state, row.test_date].join(' ').toLowerCase();
       if (query && !searchText.includes(query)) return false;
       return filterElements.every((select) => {
         if (!select.value) return true;
@@ -186,7 +190,7 @@
         <td><span class="cell-title">${display(row.student_name)}</span><span class="cell-note">${display(row.grade)}</span></td>
         <td><span class="cell-title">${display(row.parent_name)}</span><span class="cell-note">${display(row.mobile)} · ${display(row.email)}</span></td>
         <td><span class="cell-title">${display(row.school_name)}</span><span class="cell-note">${display(row.present_board)} · ${display(row.city)}</span></td>
-        <td><span class="cell-title">${display(row.test_center)}</span><span class="cell-note">${display(row.test_mode)}</span></td>
+        <td><span class="cell-title">${formatTestDate(row.test_date)}</span><span class="cell-note">${display(row.test_center)} · ${display(row.test_mode)}</span></td>
         <td><span class="status ${row.qualified_stage_1 ? 'success' : ''}">${row.qualified_stage_1 ? 'Yes' : 'No'}</span></td>
         <td><span class="status ${statusClass(row.payment_status)}">${display(row.payment_status).replaceAll('_', ' ')}</span><span class="cell-note">${money(row.fee_amount, row.currency)}</span></td>
         <td><button class="view-button" type="button" data-view="${escapeHtml(row.registration_id)}">View</button></td>
@@ -220,6 +224,7 @@
           ${detailItem('Parent / guardian', row.parent_name)}${detailItem('Mobile', row.mobile)}${detailItem('Email', row.email)}
           ${detailItem('Class', row.grade)}${detailItem('Present board', row.present_board)}${detailItem('School', row.school_name)}
           ${detailItem('City', row.city)}${detailItem('State', row.state)}${detailItem('Test center', row.test_center)}
+          ${detailItem('GIMS test date', formatTestDate(row.test_date))}
           ${detailItem('Exam mode', row.test_mode)}${detailItem('Genesis student', row.genesis_student ? 'Yes' : 'No')}${detailItem('Stage 1 through school', row.qualified_stage_1 ? 'Yes' : 'No')}${detailItem('Registration fee', money(row.fee_amount, row.currency))}
           ${detailItem('Registration status', String(row.registration_status || '').replaceAll('_', ' '))}${detailItem('Payment status', String(row.payment_status || '').replaceAll('_', ' '))}${detailItem('Verified', formatDate(row.verified_at))}
           ${detailItem('Razorpay order ID', row.razorpay_order_id)}${detailItem('User ID', row.user_id)}${detailItem('User source', row.user_source)}
@@ -231,7 +236,7 @@
   };
 
   const exportCsv = () => {
-    const fields = ['registration_id','student_name','parent_name','mobile','email','grade','school_name','present_board','city','state','test_center','test_mode','genesis_student','qualified_stage_1','fee_amount','currency','payment_status','registration_status','razorpay_order_id','created_at','verified_at'];
+    const fields = ['registration_id','student_name','parent_name','mobile','email','grade','school_name','present_board','city','state','test_center','test_date','test_mode','genesis_student','qualified_stage_1','fee_amount','currency','payment_status','registration_status','razorpay_order_id','created_at','verified_at'];
     const quote = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
     const csv = [fields.join(','), ...filteredRegistrations().map((row) => fields.map((field) => quote(row[field])).join(','))].join('\n');
     const link = document.createElement('a');
@@ -239,6 +244,41 @@
     link.download = `gims-registrations-${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
+  };
+
+  const openReconciliation = () => {
+    reconcileMessage.textContent = '';
+    reconcileForm.reset();
+    reconcileDialog.showModal();
+    reconcileForm.paymentId.focus();
+  };
+  const closeReconciliation = () => reconcileDialog.close();
+  const reconcilePayment = async (event) => {
+    event.preventDefault();
+    reconcileMessage.textContent = '';
+    if (!reconcileForm.reportValidity()) return;
+    const button = reconcileForm.querySelector('button[type="submit"]');
+    button.disabled = true;
+    button.textContent = 'Checking Razorpay…';
+    try {
+      const response = await fetch('/api/admin/reconcile-razorpay-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: securityCode, paymentId: reconcileForm.paymentId.value.trim() })
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Payment could not be reconciled.');
+      reconcileMessage.className = 'reconcile-message success';
+      reconcileMessage.textContent = result.alreadyProcessed ? `This payment was already confirmed as ${result.registrationId}.` : `Payment confirmed. Registration ID: ${result.registrationId}.`;
+      await loadDashboard();
+      setTimeout(closeReconciliation, 1400);
+    } catch (error) {
+      reconcileMessage.className = 'reconcile-message';
+      reconcileMessage.textContent = error.message;
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Verify and confirm payment';
+    }
   };
 
   loginForm.addEventListener('submit', (event) => { event.preventDefault(); securityCode = loginForm.securityCode.value; loadDashboard(); });
@@ -251,6 +291,10 @@
   analyticsRefreshButton.addEventListener('click', () => loadDashboard());
   document.querySelector('[data-dialog-close]').addEventListener('click', () => detailsDialog.close());
   detailsDialog.addEventListener('click', (event) => { if (event.target === detailsDialog) detailsDialog.close(); });
+  document.querySelector('[data-reconcile-open]').addEventListener('click', openReconciliation);
+  document.querySelector('[data-reconcile-close]').addEventListener('click', closeReconciliation);
+  reconcileDialog.addEventListener('click', (event) => { if (event.target === reconcileDialog) closeReconciliation(); });
+  reconcileForm.addEventListener('submit', reconcilePayment);
   rowsElement.addEventListener('click', (event) => { const button = event.target.closest('[data-view]'); if (button) showDetails(button.dataset.view); });
   searchInput.addEventListener('input', renderRows);
   filterElements.forEach((select) => select.addEventListener('change', renderRows));
