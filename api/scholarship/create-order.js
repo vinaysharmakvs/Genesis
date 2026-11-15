@@ -5,6 +5,7 @@ const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "rzp_test_xe08dTmycCK44q"
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 const FEE_AMOUNT_PAISE = 14900;
 const CURRENCY = "INR";
+const GIMS_TEST_DATES = new Set(["2026-11-22", "2026-11-29"]);
 
 const sendJson = (response, status, payload) => {
   response.statusCode = status;
@@ -23,13 +24,14 @@ const cleanText = (value = "", max = 120) =>
   String(value).replace(/[<>]/g, "").replace(/\s+/g, " ").trim().slice(0, max);
 
 const validateRegistration = (data) => {
-  const required = ["studentName", "parentName", "grade", "schoolName", "city", "state", "mobile", "email", "testMode", "presentBoard", "testCenter", "qualifiedStage1"];
+  const required = ["studentName", "parentName", "grade", "schoolName", "city", "state", "mobile", "email", "testMode", "testDate", "presentBoard", "testCenter", "qualifiedStage1"];
   for (const key of required) {
     if (!cleanText(data[key])) return `Missing required field: ${key}`;
   }
   if (!/^[6-9]\d{9}$/.test(cleanText(data.mobile))) return "Invalid Indian mobile number.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanText(data.email))) return "Invalid email address.";
   if (!new Set(["yes", "no"]).has(cleanText(data.qualifiedStage1).toLowerCase())) return "Invalid Stage 1 qualification selection.";
+  if (!GIMS_TEST_DATES.has(cleanText(data.testDate))) return "Please choose either 22 November 2026 or 29 November 2026 for the GIMS test.";
   return "";
 };
 
@@ -43,6 +45,7 @@ const normalizeRegistration = (data) => ({
   mobile: cleanText(data.mobile, 10),
   email: cleanText(data.email, 90).toLowerCase(),
   testMode: cleanText(data.testMode, 60),
+  testDate: cleanText(data.testDate, 10),
   presentBoard: cleanText(data.presentBoard, 20),
   testCenter: cleanText(data.testCenter, 60),
   qualifiedStage1: cleanText(data.qualifiedStage1, 3).toLowerCase() === "yes",
@@ -133,6 +136,7 @@ module.exports = async (request, response) => {
         mobile: registration.mobile,
         email: registration.email,
         testMode: registration.testMode,
+        testDate: registration.testDate,
         registrationFee: String(amount)
       }
     });
